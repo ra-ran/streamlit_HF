@@ -3,6 +3,25 @@ from streamlit_option_menu import option_menu
 import matplotlib.pyplot as plt
 import numpy as np
 
+class IndexAllocator:
+    def __init__(self):
+        self.parentIdx = 0
+        self.childIdx = 0
+        
+    def nextSection(self):
+        self.parentIdx += 1
+        self.childIdx = 0
+        
+    def getSectionIdx(self) :
+        #format : 1. / 2. / 3. ...
+        return f"{self.parentIdx}. "
+    
+    def getIdx(self):
+        self.childIdx += 1
+        #format : 1.1 / 1.2 ...
+        return f"{self.parentIdx}.{self.childIdx} " 
+
+
 @st.cache_data
 def load_contents() :
     #topic - chapter - section
@@ -143,6 +162,7 @@ def pandas_dataset():
 def show_section(topic, chapter, section):
     st.write(f"path : {topic}  / {chapter} / {section}")
     path = (topic, chapter, section)
+    idx = IndexAllocator()
 
     ### 컨텐츠 작성
     if path == ("파이썬 기초", "대단원 01", "소단원01") :
@@ -161,15 +181,16 @@ def show_section(topic, chapter, section):
     
     ### 컨텐츠 작성
     elif path == ("Pandas 기초", "DataFrame", "데이터프레임 생성") :
+        idx.nextSection()
 
-        st.title('데이터프레임 생성') ## 소단원01
+        st.header(f"{idx.getSectionIdx()}데이터프레임 생성") ## 소단원01
 
         st.markdown('- 2차원 데이터 구조 (Excel 데이터 시트와 비슷합니다.) \n'
             '- 행(row), 열(column)으로 구성되어 있습니다. \n' 		# 공백 2칸
             '- 각 열(column)은 각각의 데이터 타입 (dtype)을 가집니다. \n' 		# 공백 2칸
             )
         
-        st.header('list 통한 생성')
+        st.subheader(f"{idx.getIdx()}list 통한 생성")
         st.markdown("**list 를 통해 생성**할 수 있습니다. DataFrame을 만들 때는 **2차원 list를 대입**합니다.")
         with st.echo():
             import pandas as pd
@@ -188,7 +209,7 @@ def show_section(topic, chapter, section):
             df
 
         st.divider()
-        st.header('dictionary 통한 생성')
+        st.subheader(f"{idx.getIdx()}dictionary 통한 생성")
         st.markdown('**dictionary를 통한 생성**도 가능합니다.\n'
                     'dictionary의 **key 값이 자동으로 column 명으로 지정**되어 편리합니다.')
         with st.echo():
@@ -204,8 +225,8 @@ def show_section(topic, chapter, section):
 
         st.divider()
 
-    elif path == ("Pandas 기초", "DataFrame", "데이터프레임 속성") :
-        st.title('데이터프레임 속성') # 소단원02
+        idx.nextSection()
+        st.header(f"{idx.getSectionIdx()}데이터프레임 속성") # 소단원02
 
         st.markdown('DataFrame은 다음과 같은 **속성**을 가집니다.\n'
                     '- **index**: index (기본 값으로 RangeIndex)\n'
@@ -224,165 +245,41 @@ def show_section(topic, chapter, section):
 
         st.divider()
 
-        st.header("**df.index**")
+        st.subheader(f"{idx.getIdx()}df.index")
         st.write('''데이터프레임의''', '**인덱스(행)**','''을 출력합니다.''')
         with st.echo():
             df.index
         st.divider()
 
-        st.header("**df.columns**")
+        st.subheader(f"{idx.getIdx()}df.columns")
         st.write("데이터프레임의", "**컬럼(열)**", "을 출력합니다.")
         with st.echo():
             df.columns
         st.divider()
 
-        st.header("**df.values**")
+        st.subheader(f"{idx.getIdx()}df.values")
         st.write("데이터프레임의 **데이터 값** 을 출력합니다.")
         with st.echo():
             df.values
         st.divider()
 
-        st.header("**df.dtypes**")
+        st.subheader(f"{idx.getIdx()}df.dtypes")
         st.write("데이터프레임의 **데이터 타입** 을 출력합니다.")
         with st.echo():
             df.dtypes
         st.divider()
 
-    elif path == ("Pandas 기초", "Excel/CSV", "Excel") :
-        
-        st.title('Excel') ## 소단원01
-        st.header('Excel-불러오기') ## 소단원01 - 세부01
-
-
-        st.write('- Excel 데이터를 바로 읽어들일 수 있습니다. sheet_name 지정시 해당 sheet를 가져옵니다.\n'
-                    '''- [참고] :blue-background[pd.read_excel()]로 데이터 로드시 에러 발생한다면 engine='openpyxl'을 추가합니다.''' 
-                    )
-        st.write('')
-        st.divider()
-        st.subheader('철도 Sheet의 데이터 불러오기')
-
-        with st.echo():
-            import pandas as pd
-            excel = pd.read_excel('data/서울시대중교통/seoul_transportation.xlsx', 
-                                sheet_name='철도')
-            excel.head()
-        
-        
-        import pandas as pd
-        excel = pd.read_excel('data/서울시대중교통/seoul_transportation.xlsx', 
-                                sheet_name='철도')
-        st.write(excel.head())
-
-        st.divider()
-
-        st.subheader('버스 Sheet의 데이터 불러오기')
-
-        with st.echo():
-            import pandas as pd
-            excel = pd.read_excel('data/서울시대중교통/seoul_transportation.xlsx', 
-                                sheet_name='버스', engine='openpyxl')
-            excel.head()
-        excel = pd.read_excel('data/서울시대중교통/seoul_transportation.xlsx', 
-                                sheet_name='버스', engine='openpyxl')
-        st.write(excel.head())
-        st.divider()
-        st.markdown(''':blue-background[sheet_name]을 None으로 지정하면 모든 sheet를 가지고 옵니다.''')
-                    
-        st.write('가지고 올 때는 OrderedDict로 가져오며, :blue-background[keys()]로 시트명을 조회할 수 있습니다.')
-        with st.echo():
-            import pandas as pd
-            excel = pd.read_excel('data/서울시대중교통/seoul_transportation.xlsx', 
-                                sheet_name=None, engine='openpyxl')
-            excel
-
-        st.divider()
-        st.markdown(':blue-background[keys()]를 통해 엑셀이 포함하고 있는 시트를 조회할 수 있습니다.')
-        with st.echo():
-            excel.keys()
-        st.write(excel.keys())
-        st.divider()
-
-        st.header('Excel-저장하기') ## 소단원01 - 세부02
-
-        st.write('DataFrame을 Excel로 저장할 수 있으며, Excel로 저장시 **파일명**을 지정합니다.\n'
-                    '- index=False 옵션은 가급적 꼭 지정하는 옵션입니다. 지정을 안하면 **index가 별도의 컬럼으로 저장**되게 됩니다.\n'
-                    '- sheet_name을 지정하여, 저장할 시트의 이름을 변경할 수 있습니다.\n'
-                    )
-        st.divider()
-
-        with st.echo():
-            import pandas as pd
-            excel = pd.read_excel('data/서울시대중교통/seoul_transportation.xlsx', sheet_name='철도', engine='openpyxl')
-            excel.head()
-        st.write(excel.head())
-            
-        st.divider()
-        
-
-        st.subheader('시트명 없이 저장')
-        code = '''excel.to_excel('sample.xlsx', index=True)'''
-        st.code(code, language="python")
-        st.write('현재 디렉터리에서 sample.xlsx가 저장된 것을 확인할 수 있습니다.')
-        st.divider()
-        
-        st.subheader('시트명 지정하여 저장')
-        code = '''excel.to_excel('sample1.xlsx', index=False, sheet_name='샘플')'''
-        st.write('현재 디렉터리에서 sample1.xlsx가 저장된 것을 확인할 수 있습니다.')
-        st.code(code, language="python")
-        st.divider()
-
-        
-
-    elif path == ("Pandas 기초", "Excel/CSV", "CSV") :
-        st.title('CSV') ## 소단원02
-
-        st.write('한 줄이 한 개의 행에 해당하며, 열 사이에는 **쉼표(,)를 넣어 구분**합니다.\n')
-        st.write('Excel보다 훨씬 가볍고 **차지하는 용량이 적기 때문에 대부분의 파일 데이터는 csv 형태**로 제공됩니다.')
-
-        st.header('CSV-불러오기') ## 소단원02- 세부01
-        with st.echo():
-            import pandas as pd
-            df = pd.read_csv('data/서울시주민등록인구/seoul_population.csv')
-            df
-        st.divider()
-
-        st.header('CSV-저장하기') ## 소단원02 - 세부02
-        st.markdown('저장하는 방법은 excel과 유사합니다.\n'
-                    '다만, csv파일 형식에는 sheet_name 옵션은 없습니다.')
-
-        with st.echo():
-            import pandas as pd
-            df = pd.read_csv('data/서울시주민등록인구/seoul_population.csv')
-            df
-        st.divider()
-
-        st.write(''':blue-background[to_csv()]로 csv 파일형식으로 저장할 수 있습니다.''')
-        code='''df.to_csv('sample.csv', index=False)'''
-        st.code(code, language="python")
-        st.write('현재 디렉터리에서 sample.csv가 저장된 것을 확인할 수 있습니다.')
-        st.divider()
-
-        st.markdown("읽어드린 **Excel 파일도 csv**로 저장할 수 있습니다.")
-        with st.echo():
-            import pandas as pd
-            excel = pd.read_excel('data/서울시대중교통/seoul_transportation.xlsx', 
-                                sheet_name='버스')
-        code = '''excel.to_csv('sample1.csv', index=False)'''
-        st.code(code, language="python")
-        st.write('현재 디렉터리에서 sample1.csv가 저장된 것을 확인할 수 있습니다.')
-        st.divider()
-
-    elif path == ("Pandas 기초", "DataFrame", "데이터프레임 조회"):
-
-        st.title('데이터프레임 조회') ## 소단원03
+        idx.nextSection()
+        st.header(f"{idx.getSectionIdx()}데이터프레임 조회") ## 소단원03
 
         st.write('데이터프레임(DataFrame)에서 가장 많이 사용하는 **조회, 정렬 그리고 조건필터**에 대해 알아보겠습니다.')
         st.write('조회, 정렬, 조건필터 기능은 엑셀에서도 가장 많이 활용하는 기능입니다.')
         st.write('Pandas는 조회, 정렬, 조건필터의 기능을 매우 편리하게 사용할 수 있도록 지원합니다.')
+        st.divider()
 
         pandas_dataset()
 
-        st.subheader('head() 앞 부분 / tail() 뒷 부분 조회')
+        st.subheader(f"{idx.getIdx()}head() 앞 부분 / tail() 뒷 부분 조회")
         st.write('- default 옵션 값으로 **5개의 행이 조회**됩니다.')
         st.write('- 괄호 안에 숫자를 넣어 명시적으로 조회하고 싶은 행의 갯수를 지정할 수 있습니다.')
         
@@ -407,7 +304,7 @@ def show_section(topic, chapter, section):
         st.write(df.tail(7))
         st.divider()
 
-        st.subheader('info()')
+        st.subheader(f"{idx.getIdx()}info()")
         st.write('- 컬럼별 정보(information)를 보여줍니다.')
         st.write('- 데이터의 갯수, 그리고 데이터 타입(dtype)을 확인할 때 사용합니다.')
         st.code('''df.info()''')
@@ -420,7 +317,7 @@ def show_section(topic, chapter, section):
         st.write('''- **category** 타입도 있습니다. category 타입은 문자열이지만, '남자' / '여자'처럼 카테고리화 할 수 있는 컬럼을 의미 합니다''')
         st.divider()
 
-        st.subheader('value_counts()')
+        st.subheader(f"{idx.getIdx()}value_counts()")
         st.write('- column 별 **값의 분포를 확인**할 때 사용합니다.')
         st.write('- **남자, 여자, 아이의 데이터 분포를 확인**하고 싶다면 다음과 같이 실행합니다.')
 
@@ -429,7 +326,7 @@ def show_section(topic, chapter, section):
         st.write(df['who'].value_counts())
         st.divider()
 
-        st.subheader('속성: Attributes')
+        st.subheader(f"{idx.getIdx()}Attributes : 속성")
         st.write('속성 값은 **함수형으로 조회하지 않습니다.**')
         st.write('자주 활용하는 DataFrame은 **속성 값**들은 다음과 같습니다.')
         st.markdown('- ndim\n' '- shape\n' '- index\n' '- columns\n' '- values\n')
@@ -459,16 +356,17 @@ def show_section(topic, chapter, section):
         with st.echo():
             df.values
 
-    elif path == ("Pandas 기초", "DataFrame", "데이터프레임 정렬"):
-        st.header('데이터프레임 정렬') ## 소단원04
+        idx.nextSection()
+        st.header(f"{idx.getSectionIdx()}데이터프레임 정렬") ## 소단원04
 
         st.write('데이터프레임(DataFrame)에서 가장 많이 사용하는 **조회, 정렬 그리고 조건필터**에 대해 알아보겠습니다.')
         st.write('조회, 정렬, 조건필터 기능은 엑셀에서도 가장 많이 활용하는 기능입니다.')
         st.write('Pandas는 조회, 정렬, 조건필터의 기능을 매우 편리하게 사용할 수 있도록 지원합니다.')
+        st.divider()
 
         pandas_dataset()
 
-        st.subheader('sort_index: index 정렬')
+        st.subheader(f"{idx.getIdx()}sort_index: index 정렬")
         st.write('- index 기준으로 정렬합니다. (기본 오름차순이 적용되어 있습니다.)')
         st.write('내림차순 정렬을 적용하려면, :blue-background[ascending=False]를 옵션 값으로 설정합니다.')
 
@@ -483,7 +381,7 @@ def show_section(topic, chapter, section):
         st.write(df.sort_index(ascending=False).head(5))
         st.divider()
 
-        st.subheader('sort_values: 값에 대한 정렬')
+        st.subheader(f"{idx.getIdx()}sort_values: 값에 대한 정렬")
         st.write('- 값을 기준으로 행을 정렬합니다.')
         st.write('- by에 기준이 되는 행을 설정합니다.')
         st.write('- by에 2개 이상의 컬럼을 지정하여 정렬할 수 있습니다.')
@@ -512,35 +410,34 @@ def show_section(topic, chapter, section):
         st.write(df.sort_values(by=['fare', 'age'], ascending=[False, True]).head())
         st.divider()
 
-            
-    elif path == ("Pandas 기초", "DataFrame", "Indexing, Slicing, 조건 필터링"):
-        
-        st.title('Indexing, Slicing, 조건 필터링') ## 소단원05
+        idx.nextSection()
+        st.header(f"{idx.getSectionIdx()}Indexing, Slicing, 조건 필터링") ## 소단원05
 
         st.write('데이터프레임(DataFrame)에서 가장 많이 사용하는 **조회, 정렬 그리고 조건필터**에 대해 알아보겠습니다.')
         st.write('조회, 정렬, 조건필터 기능은 엑셀에서도 가장 많이 활용하는 기능입니다.')
         st.write('Pandas는 조회, 정렬, 조건필터의 기능을 매우 편리하게 사용할 수 있도록 지원합니다.')
+        st.divider()
 
         pandas_dataset()
 
         import seaborn as sns
         df = sns.load_dataset('titanic')
 
-        st.header('loc - indexing / slicing')
+        st.subheader(f"{idx.getIdx()}loc - indexing / slicing")
         st.write('- indexing과 slicing을 할 수 있습니다.')
         st.write('- slicing은 [**시작(포함): 끝(포함)**] 규칙에 유의합니다. 둘 다 포함 합니다.')
 
-        st.subheader('**indexing 예시**')
+        st.write('**01-1. indexing 예시**')
         st.code('''df.loc[5, 'class']''')
         st.write(df.loc[5, 'class'])
         st.divider()
 
-        st.subheader('**fancy indexing 예시**')
+        st.write('**01-2. fancy indexing 예시**')
         st.code('''df.loc[2:5, ['age', 'fare', 'who']]''')
         st.write(df.loc[2:5, ['age', 'fare', 'who']])
         st.divider()
 
-        st.subheader('**slicing 예시**')
+        st.write('**01-3. slicing 예시**')
         st.code('''df.loc[2:5, 'class':'deck'].head()''')
         st.write(df.loc[2:5, 'class':'deck'].head())
 
@@ -548,7 +445,7 @@ def show_section(topic, chapter, section):
         st.write(df.loc[:6, 'class':'deck'])
         st.divider()
 
-        st.subheader('**loc - 조건 필터**')
+        st.write('**01-4. loc - 조건 필터**')
         st.write('boolean index을 만들어 조건에 맞는 데이터만 추출해 낼 수 있습니다.')
         st.code('''cond = (df['age'] >= 70)\ncond''')
         cond = (df['age'] >= 70)
@@ -558,14 +455,10 @@ def show_section(topic, chapter, section):
         st.write(df.loc[cond])
         st.divider()
 
-        st.subheader('**loc - 다중조건**')
+        st.write('**01-5. loc - 다중조건**')
         st.write('다중 조건은 먼저 condition(조건)을 정의하고 **&** 와 **|** 연산자로 **복합 조건을 생성**합니다.')
         st.code(
-            '''# 조건1 정의
-            cond1 = (df['fare'] > 30)
-
-            # 조건2 정의
-            cond2 = (df['who'] == 'woman')''')
+            '''# 조건1 정의\ncond1 = (df['fare'] > 30)\n# 조건2 정의\ncond2 = (df['who'] == 'woman')''')
         cond1 = (df['fare'] > 30)
         cond2 = (df['who'] == 'woman')
         st.code('''df.loc[cond1 & cond2]''')
@@ -576,7 +469,7 @@ def show_section(topic, chapter, section):
         st.write(df.loc[cond1 | cond2])
         st.divider()
 
-        st.write('**조건 필터 후 데이터 대입**')
+        st.write('**01-6. 조건 필터 후 데이터 대입**')
         st.code('''cond = (df['age'] >= 70)\ncond''')
         cond = (df['age'] >= 70)
         st.write(cond)
@@ -585,7 +478,7 @@ def show_section(topic, chapter, section):
         st.write(df.loc[cond])
         st.divider()
 
-        st.write('**나이 컬럼**만 가져옵니다.')
+        st.write('**01-7. 나이 컬럼**만 가져옵니다.')
         with st.echo():
             df.loc[cond, 'age']
         st.divider()
@@ -597,29 +490,29 @@ def show_section(topic, chapter, section):
             df.loc[cond]
         st.divider()
 
-        st.header('iloc')
+        st.subheader(f"{idx.getIdx()}iloc")
         st.write('- :blue-background[loc]와 유사하지만, index만 허용합니다.')
         st.write('loc와 마찬가지고, indexing / slicing 모두 가능합니다.')
         st.code('''df.head()''')
         st.write(df.head())
         st.divider()
 
-        st.subheader('**indexing**')
+        st.write('**02-1. indexing**')
         st.code('''df.iloc[1, 3]''')
         st.write(df.iloc[1, 3])
         st.divider()
 
-        st.subheader('**Fancy Indexing**')
+        st.write('**02-2. Fancy Indexing**')
         st.code('''df.iloc[[0, 3, 4], [0, 1, 5, 6]]''')
         st.write(df.iloc[[0, 3, 4], [0, 1, 5, 6]])
         st.divider()
 
-        st.subheader('**Slicing**')
+        st.write('**02-3. Slicing**')
         st.code('''df.iloc[:3, :5]''')
         st.write(df.iloc[:3, :5])
         st.divider()
 
-        st.subheader('**isin**')
+        st.write('**02-4. isin**')
         st.write('특정 값의 포함 여부는 isin 함수를 통해 비교가 가능합니다. (파이썬의 in 키워드는 사용 불가 합니다.)')
         with st.echo():
             import pandas as pd
@@ -642,14 +535,141 @@ def show_section(topic, chapter, section):
         with st.echo():
             sample.loc[condition]
 
+    ## Excel/CSV        
+
+    elif path == ("Pandas 기초", "Excel/CSV", "Excel") :
+        idx.nextSection()
+        
+        st.header(f"{idx.getSectionIdx()}Excel") ## 소단원01
+        st.subheader(f"{idx.getIdx()}Excel-불러오기") ## 소단원01 - 세부01
+
+
+        st.write('- Excel 데이터를 바로 읽어들일 수 있습니다. sheet_name 지정시 해당 sheet를 가져옵니다.\n'
+                    '''- [참고] :blue-background[pd.read_excel()]로 데이터 로드시 에러 발생한다면 engine='openpyxl'을 추가합니다.''' 
+                    )
+        st.divider()
+        st.write('**철도 Sheet의 데이터 불러오기**')
+
+        with st.echo():
+            import pandas as pd
+            excel = pd.read_excel('data/서울시대중교통/seoul_transportation.xlsx', 
+                                sheet_name='철도')
+            excel.head()
+        
+        
+        import pandas as pd
+        excel = pd.read_excel('data/서울시대중교통/seoul_transportation.xlsx', 
+                                sheet_name='철도')
+        st.write(excel.head())
+
+        st.divider()
+
+        st.write('**버스 Sheet의 데이터 불러오기**')
+
+        with st.echo():
+            import pandas as pd
+            excel = pd.read_excel('data/서울시대중교통/seoul_transportation.xlsx', 
+                                sheet_name='버스', engine='openpyxl')
+            excel.head()
+        excel = pd.read_excel('data/서울시대중교통/seoul_transportation.xlsx', 
+                                sheet_name='버스', engine='openpyxl')
+        st.write(excel.head())
+        st.divider()
+        st.markdown(''':blue-background[sheet_name]을 None으로 지정하면 모든 sheet를 가지고 옵니다.''')
+                    
+        st.write('가지고 올 때는 OrderedDict로 가져오며, :blue-background[keys()]로 시트명을 조회할 수 있습니다.')
+        with st.echo():
+            import pandas as pd
+            excel = pd.read_excel('data/서울시대중교통/seoul_transportation.xlsx', 
+                                sheet_name=None, engine='openpyxl')
+            excel
+
+        st.divider()
+        st.markdown(':blue-background[keys()]를 통해 엑셀이 포함하고 있는 시트를 조회할 수 있습니다.')
+        with st.echo():
+            excel.keys()
+        st.write(excel.keys())
+        st.divider()
+
+        st.subheader(f"{idx.getIdx()}Excel-저장하기") ## 소단원01 - 세부02
+
+        st.write('DataFrame을 Excel로 저장할 수 있으며, Excel로 저장시 **파일명**을 지정합니다.\n'
+                    '- index=False 옵션은 가급적 꼭 지정하는 옵션입니다. 지정을 안하면 **index가 별도의 컬럼으로 저장**되게 됩니다.\n'
+                    '- sheet_name을 지정하여, 저장할 시트의 이름을 변경할 수 있습니다.\n'
+                    )
+        st.divider()
+
+        with st.echo():
+            import pandas as pd
+            excel = pd.read_excel('data/서울시대중교통/seoul_transportation.xlsx', sheet_name='철도', engine='openpyxl')
+            excel.head()
+        st.write(excel.head())
+            
+        st.divider()
+        
+
+        st.write('**시트명 없이 저장**')
+        code = '''excel.to_excel('sample.xlsx', index=True)'''
+        st.code(code, language="python")
+        st.write('현재 디렉터리에서 sample.xlsx가 저장된 것을 확인할 수 있습니다.')
+        st.divider()
+        
+        st.write('**시트명 지정하여 저장**')
+        code = '''excel.to_excel('sample1.xlsx', index=False, sheet_name='샘플')'''
+        st.write('현재 디렉터리에서 sample1.xlsx가 저장된 것을 확인할 수 있습니다.')
+        st.code(code, language="python")
+        st.divider()
+
+        idx.nextSection()
+        st.header(f"{idx.getSectionIdx()}CSV") ## 소단원02
+
+        st.write('한 줄이 한 개의 행에 해당하며, 열 사이에는 **쉼표(,)를 넣어 구분**합니다.\n')
+        st.write('Excel보다 훨씬 가볍고 **차지하는 용량이 적기 때문에 대부분의 파일 데이터는 csv 형태**로 제공됩니다.')
+
+        st.subheader(f"{idx.getIdx()}CSV-불러오기") ## 소단원02- 세부01
+        with st.echo():
+            import pandas as pd
+            df = pd.read_csv('data/서울시주민등록인구/seoul_population.csv')
+            df
+        st.divider()
+
+        st.subheader(f"{idx.getIdx()}CSV-저장하기") ## 소단원02 - 세부02
+        st.markdown('저장하는 방법은 excel과 유사합니다.\n'
+                    '다만, csv파일 형식에는 sheet_name 옵션은 없습니다.')
+
+        with st.echo():
+            import pandas as pd
+            df = pd.read_csv('data/서울시주민등록인구/seoul_population.csv')
+            df
+        st.divider()
+
+        st.write(''':blue-background[to_csv()]로 csv 파일형식으로 저장할 수 있습니다.''')
+        code='''df.to_csv('sample.csv', index=False)'''
+        st.code(code, language="python")
+        st.write('현재 디렉터리에서 sample.csv가 저장된 것을 확인할 수 있습니다.')
+        st.divider()
+
+        st.markdown("읽어드린 **Excel 파일도 csv**로 저장할 수 있습니다.")
+        with st.echo():
+            import pandas as pd
+            excel = pd.read_excel('data/서울시대중교통/seoul_transportation.xlsx', 
+                                sheet_name='버스')
+        code = '''excel.to_csv('sample1.csv', index=False)'''
+        st.code(code, language="python")
+        st.write('현재 디렉터리에서 sample1.csv가 저장된 것을 확인할 수 있습니다.')
+        st.divider()
+
     elif path == ("Pandas 기초", "Data 전처리", "데이터 복사"):
+        idx.nextSection()
+        st.header(f"{idx.getSectionIdx()}데이터 복사") ## 소단원01
+        
         st.write('Pandas DataFrame의 **복사(Copy), 결측치 처리**, 그리고 row, column의 **추가, 삭제, 컬럼간 연산, 타입의 변환**을 다뤄보겠습니다.')
+        st.divider()
+
         pandas_dataset()
 
         import seaborn as sns
         df = sns.load_dataset('titanic')
-
-        st.title('데이터 복사') ## 소단원01
 
         st.write('DataFrame을 **복제**합니다. 복제한 DataFrame을 수정해도 **원본에는 영향을 미치지 않습니다.**')
         code = '''df.head()'''
@@ -682,9 +702,8 @@ def show_section(topic, chapter, section):
         st.write(df.head())
         st.divider()
 
-    elif path == ("Pandas 기초", "Data 전처리", "데이터 결측치"):
-
-        st.title('데이터 결측치') ## 소단원02
+        idx.nextSection()
+        st.header(f"{idx.getSectionIdx()}데이터 결측치") ## 소단원02
 
         import seaborn as sns
         df = sns.load_dataset('titanic')
@@ -699,18 +718,18 @@ def show_section(topic, chapter, section):
         st.write('4. 결측 데이터 **제거하기**')
         st.divider()
 
-        st.header('결측치 확인 - isnull(), isnan()')
+        st.subheader(f"{idx.getIdx()}결측치 확인 - isnull(), isnan()")
         st.write('컬럼(column)별 결측치의 갯수를 확인하기 위해서는 :blue-background[sum()] 함수를 붙혀주면 됩니다.')
         st.write(':blue-background[sum()]은 Pandas의 통계 관련 함수이며, 통계 관련 함수는 **Static** 챕터에서 알 수 있습니다.')
         st.divider()
-        st.subheader('**isnull()**')
+        st.write('**isnull()**')
         
         code = 'df.isnull().sum()'
         st.code(code)
         st.write(df.isnull().sum())
         st.divider()
 
-        st.subheader('**isna()**')
+        st.write('**isna()**')
         st.write('isnull() 과 동작이 완전 같습니다. 편한 것으로 써주세요. (심지어 도큐먼트도 같습니다)')
         code ='df.isna().sum()'
         st.code(code)
@@ -723,14 +742,14 @@ def show_section(topic, chapter, section):
         st.write(df.isnull().sum().sum())    
         st.divider()
 
-        st.header('결측치가 아닌 데이터 확인 - notnull()')
+        st.subheader(f"{idx.getIdx()}결측치가 아닌 데이터 확인 - notnull()")
         st.write(':blue-background[notnull()]은 :blue-background[isnull()]과 정확히 **반대** 개념입니다.')
         code = 'df.notnull().sum()'
         st.code(code)
         st.write(df.notnull().sum())
         st.divider()
 
-        st.header('결측 데이터 필터링')
+        st.subheader(f"{idx.getIdx()}결측 데이터 필터링")
 
         st.write(':blue-background[isnull()] 함수가 결측 데이터를 찾는 **boolean index** 입니다.')
         st.write('즉, :blue-background[loc]에 적용하여 조건 필터링을 걸 수 있습니다.')
@@ -739,7 +758,7 @@ def show_section(topic, chapter, section):
         st.write(df.loc[df['age'].isnull()])
         st.divider()
 
-        st.header('결측치 채우기 - fillna()')
+        st.subheader(f"{idx.getIdx()}결측치 채우기 - fillna()")
         st.write(':blue-background[fillna()]를 활용하면 결측치에 대하여 일괄적으로 값을 채울 수 있습니다.')
         code = ''' # 다시 원본 DataFrame 로드\ndf = sns.load_dataset('titanic')'''
         st.code(code)
@@ -767,7 +786,7 @@ def show_section(topic, chapter, section):
         st.write(df1.tail())    
         st.divider()
 
-        st.header('통계값으로 채우기')
+        st.subheader(f"{idx.getIdx()}통계값으로 채우기")
         code = '''df1 = df.copy()'''
         st.code(code)
         df1 = df.copy()
@@ -776,13 +795,13 @@ def show_section(topic, chapter, section):
         st.write(df1.tail())
         st.divider()
 
-        st.subheader('평균으로 채우기')
+        st.write('**05-1. 평균으로 채우기**')
         code = '''df1['age'].fillna(df1['age'].mean()).tail()'''
         st.code(code)
         st.code(df1['age'].fillna(df1['age'].mean()).tail())
         st.divider()
 
-        st.subheader('최빈값으로 채우기')
+        st.write('**05-2. 최빈값으로 채우기**')
         code = '''df1['deck'].mode()'''
         st.code(code)
         st.write(df1['deck'].mode())
@@ -800,7 +819,7 @@ def show_section(topic, chapter, section):
         
         st.divider()
 
-        st.subheader('NaN 값이 있는 데이터 제거하기 (dropna)')
+        st.subheader(f"{idx.getIdx()}NaN 값이 있는 데이터 제거하기 (dropna)")
         code = '''df1 = df.copy()
             df1.tail()'''
         st.code(code)
@@ -827,10 +846,10 @@ def show_section(topic, chapter, section):
         df1.dropna(how='all')
         st.write(df1)
 
-    elif path == ("Pandas 기초", "Data 전처리", "column 추가"):
-        st.title('column 추가') ## 소단원03
+        idx.nextSection()
+        st.header(f"{idx.getSectionIdx()}column 추가") ## 소단원03
 
-        st.header('새로운 column 추가') 
+        st.subheader(f"{idx.getIdx()}새로운 column 추가") 
 
         import seaborn as sns
         df = sns.load_dataset('titanic')
@@ -864,8 +883,8 @@ def show_section(topic, chapter, section):
         st.write(df1.head())
         st.divider()
 
-    elif path == ("Pandas 기초", "Data 전처리", "데이터 삭제"):
-        st.title('데이터 삭제') ## 소단원04
+        idx.nextSection()
+        st.header(f"{idx.getSectionIdx()}데이터 삭제") ## 소단원04
         import seaborn as sns
         df = sns.load_dataset('titanic')
         df1 = df.copy()
@@ -874,7 +893,7 @@ def show_section(topic, chapter, section):
         st.write('삭제는 **행(row) 삭제와 열(column) 삭제**로 구분할 수 있습니다.')
         st.divider()
 
-        st.subheader('행 (row) 삭제')
+        st.subheader(f"{idx.getIdx()}행 (row) 삭제")
         st.write('행 삭제시 **index를 지정하여 삭제**합니다.')
         
         code = 'df1.drop(1)'
@@ -894,7 +913,7 @@ def show_section(topic, chapter, section):
             
         st.divider()
 
-        st.subheader('열 (column) 삭제')
+        st.subheader(f"{idx.getIdx()}열 (column) 삭제")
         st.code('df1.head()')
         st.write(df1.head())
         st.divider()
@@ -917,8 +936,8 @@ def show_section(topic, chapter, section):
         st.code('df1.head()')
         st.write(df1.head())
 
-    elif path == ("Pandas 기초", "Data 전처리", "column 연산"):
-        st.title('column 연산')
+        idx.nextSection()
+        st.header(f"{idx.getSectionIdx()}column 연산")
 
         st.write('**컬럼(column) 과 컬럼 사이의 연산을 매우 쉽게 적용**할 수 있습니다.')
         
@@ -948,8 +967,8 @@ def show_section(topic, chapter, section):
         st.write(df1.loc[df1['age'].isnull(), 'deck':].head())
         st.divider()
     
-    elif path == ("Pandas 기초", "Data 전처리", "데이터 변환"):
-        st.title('데이터 변환')
+        idx.nextSection()
+        st.header(f"{idx.getSectionIdx()}데이터 변환")
 
         st.write('- 데이터 변환에서는 category 타입으로 변환하는 방법에 대해 알아보겠습니다.')
         st.write('- category로 변경시 사용하는 메모리를 줄일 수 있습니다.')
@@ -958,7 +977,7 @@ def show_section(topic, chapter, section):
         import io
         st.divider()
 
-        st.header('category 타입')
+        st.subheader(f"{idx.getIdx()}category 타입")
         
         st.code('''df1 = df.copy()\ndf1.head(2)''')
         df1 = df.copy()
@@ -971,7 +990,7 @@ def show_section(topic, chapter, section):
         st.text(s)
         st.divider()
 
-        st.header('category로 변경')
+        st.subheader(f"{idx.getIdx()}category로 변경")
         st.write(':blue-background[category]로 변경시에는 Categories가 같이 출력됩니다.')
         st.code('''df1['who'].astype('category').head()''')
         st.write(df1['who'].astype('category').head())
@@ -993,10 +1012,11 @@ def show_section(topic, chapter, section):
     
 
     elif path == ("Pandas 기초", "Data 연결과 병합", "데이터 연결"):
+        idx.nextSection()
 
         import pandas as pd
 
-        st.header('데이터 연결') ## 소단원01
+        st.header(f"{idx.getSectionIdx()}데이터 연결") ## 소단원01
 
         st.write('여러 개의 DataFrame으로 이루어진 데이터를 합치는 방법인 concat()(연결), merge()(병합)에 대하여 다뤄보겠습니다.')
         st.write('- :blue-background[concat()]은 2개 이상의 DataFrame을 행 혹은 열 방향으로 연결합니다.')
@@ -1024,7 +1044,7 @@ def show_section(topic, chapter, section):
         st.write('단순하게 지정한 DataFrame을 이어서 연결합니다.')
         st.divider()
 
-        st.subheader('행 방향으로 연결')
+        st.subheader(f"{idx.getIdx()}행 방향으로 연결")
         st.write('기본 값인 :blue-background[axis=0]이 지정되어 있고, 행 방향으로 연결합니다.')
         st.write('또한, 같은 column을 알아서 찾아서 데이터를 연결합니다.')
 
@@ -1059,7 +1079,7 @@ def show_section(topic, chapter, section):
         st.write(pd.concat([gas11, gas22], ignore_index=True))
         st.divider()
 
-        st.subheader('열 방향으로 연결')
+        st.subheader(f"{idx.getIdx()}열 방향으로 연결")
         st.write('열(column) 방향으로 연결 가능하며, :blue-background[axis=1]로 지정합니다.')
         code='''# 실습을 위한 DataFrame 임의 분할\n +
             gas1 = gas.iloc[:, :5]\n +
@@ -1077,9 +1097,8 @@ def show_section(topic, chapter, section):
         st.code('pd.concat([gas1, gas2], axis=1)')
         st.write(pd.concat([gas1, gas2], axis=1))
         
-    elif path == ("Pandas 기초", "Data 연결과 병합", "데이터 병합"):    
-        
-        st.header('데이터 병합') ## 소단원02
+        idx.nextSection()
+        st.header(f"{idx.getSectionIdx()}데이터 병합") ## 소단원02
         import pandas as pd
 
         st.write('여러 개의 DataFrame으로 이루어진 데이터를 합치는 방법인 concat() - 연결, merge() - 병합에 대하여 알아보겠습니다.')
@@ -1106,7 +1125,7 @@ def show_section(topic, chapter, section):
         
         st.divider()
 
-        st.subheader('병합하는 방법 4가지')
+        st.subheader(f"{idx.getIdx()}병합하는 방법 4가지")
 
         st.write(':blue-background[how] 옵션 값을 지정하여 4가지 방식으로 병합을 할 수 있으며, 각기 다른 결과를 냅니다.')
         st.write('''- **how** : '{':blue-background[left], :blue-background[right], :blue-background[outer], :blue-background[inner]'}',''')
@@ -1127,7 +1146,7 @@ def show_section(topic, chapter, section):
         st.write(pd.merge(df1, df2, how='outer'))
         st.divider()
 
-        st.subheader('병합하려는 컬럼의 이름이 다른 경우')
+        st.subheader(f"{idx.getIdx()}병합하려는 컬럼의 이름이 다른 경우")
         with st.echo():
             df1 = pd.DataFrame({
             '이름': ['박세리', '이대호', '손흥민', '김연아', '마이클조던'],
@@ -1150,8 +1169,9 @@ def show_section(topic, chapter, section):
         st.write(pd.merge(df1, df2, left_on='이름', right_on='고객명'))
 
     elif path == ("Pandas 기초", "Static", "기술 통계"):
+        idx.nextSection()
         
-        st.title('기술 통계') # 소단원01
+        st.header(f"{idx.getSectionIdx()}기술 통계") # 소단원01
 
         st.write('**통계**는 데이터 분석에서 굉장히 중요한 요소입니다.')
         st.write('데이터에 대한 통계 계산식을 Pandas 함수로 제공하기 때문에 쉽게 통계 값을 산출할 수 있습니다.')
@@ -1164,8 +1184,7 @@ def show_section(topic, chapter, section):
         # for col in df.select_dtypes(include=['object']):
         #     df[col] = df[col].astype('category')
 
-
-        st.subheader('describe() - 요약통계')
+        st.subheader(f"{idx.getIdx()}describe() - 요약통계")
 
         st.write('전반적인 주요 통계를 확인할 수 있습니다.')
         st.write('기본 값으로 **수치형(Numberical) 컬럼**에 대한 통계표를 보여줍니다.')
@@ -1201,7 +1220,7 @@ def show_section(topic, chapter, section):
         # for col in df.select_dtypes(include=['object']):
         #     df[col] = df[col].astype('category')
 
-        st.subheader('count() - 개수')
+        st.subheader(f"{idx.getIdx()}count() - 개수")
 
         st.write('데이터의 개수')
         st.write('DataFrame 전체의 개수를 구하는 경우')
@@ -1229,7 +1248,7 @@ def show_section(topic, chapter, section):
 
         st.divider()
 
-        st.subheader('mean - 조건별 평균')
+        st.subheader(f"{idx.getIdx()}mean - 조건별 평균")
         st.write('성인 남성의 나이의 평균 구하기')
         code = '''condition = (df['adult_male'] == True)\ndf.loc[condition, 'age'].mean()'''
         st.code(code)
@@ -1238,7 +1257,7 @@ def show_section(topic, chapter, section):
 
         st.divider()
 
-        st.subheader('median() - 중앙값')
+        st.subheader(f"{idx.getIdx()}median() - 중앙값")
         st.write('데이터의 중앙 값을 출력 합니다. 데이터를 **오름차순 정렬하여 중앙에 위치한 값**입니다.')
         st.write('이상치(outlier)가 존재하는 경우, mean()보다 median()을 대표값으로 더 선호합니다.')
 
@@ -1264,7 +1283,7 @@ def show_section(topic, chapter, section):
 
         st.divider()
 
-        st.subheader('sum() - 합계')
+        st.subheader(f"{idx.getIdx()}sum() - 합계")
 
         st.write('데이터의 **합계**입니다. 문자열 column은 모든 데이터가 붙어서 출력될 수 있습니다.')
         st.code('''df.loc[:, ['age', 'fare']].sum()''')
@@ -1276,7 +1295,7 @@ def show_section(topic, chapter, section):
 
         st.divider()
 
-        st.subheader('var() - 분산')
+        st.subheader(f"{idx.getIdx()}var() - 분산")
 
         st.latex(r'''
         \text{분산} = \frac{\sum_{i=1}^n (X_i - \bar{X})^2}{n-1}
@@ -1292,7 +1311,7 @@ def show_section(topic, chapter, section):
         my_var = ((df['fare'].values - fare_mean) ** 2).sum() / (df['fare'].count() - 1)
         st.write(my_var)
         st.divider()
-        st.subheader('std() - 표준편차')
+        st.subheader(f"{idx.getIdx()}std() - 표준편차")
         st.latex(r'''
         \text{표준편차} = \sqrt{\text{분산}} = \sqrt{\frac{\sum_{i=1}^n (X_i - \bar{X})^2}{n-1}}
                 ''')
@@ -1305,7 +1324,7 @@ def show_section(topic, chapter, section):
         st.write(df['fare'].std())
         st.divider()
 
-        st.subheader('min() - 최소값, max() - 최대값')
+        st.subheader(f"{idx.getIdx()}min() - 최소값, max() - 최대값")
         st.code(
          '''# 최소값
             df['age'].min()
@@ -1315,7 +1334,7 @@ def show_section(topic, chapter, section):
         st.write(df['age'].max())
         st.divider()
 
-        st.subheader('mode() - 최빈값')
+        st.subheader(f"{idx.getIdx()}mode() - 최빈값")
         st.write('최빈값은 **가장 많이 출현한 데이터**를 의미합니다.')
         st.code('''df['who'].mode()''')
         st.write(df['who'].mode())   
@@ -1324,9 +1343,9 @@ def show_section(topic, chapter, section):
         st.code('''df['deck'].mode()''')
         st.write(df['deck'].mode())
         st.divider()
-    
-    elif path == ("Pandas 기초", "Static", "고급 통계"):
-        st.title('고급 통계')
+        
+        idx.nextSection()
+        st.header(f"{idx.getSectionIdx()}고급 통계")
 
         st.write('"고급 통계 함수"는 기술 통계보다 더 복잡한 연산이나 특수한 목적을 가진 함수입니다.')
 
@@ -1336,7 +1355,7 @@ def show_section(topic, chapter, section):
         df = sns.load_dataset('titanic')
 
         
-        st.subheader('agg - aggregation: 통합 통계 적용 (복수의 통계 함수 적용)')
+        st.subheader(f"{idx.getIdx()}agg - aggregation: 통합 통계 적용 (복수의 통계 함수 적용)")
         st.write('단일 컬럼에 agg 적용')
         st.code('''df['age'].agg(['min', 'max', 'count','mean'])''')
         st.write(df['age'].agg(['min', 'max', 'count','mean']))       
@@ -1347,7 +1366,7 @@ def show_section(topic, chapter, section):
     
         st.divider()
 
-        st.subheader('quantile() - 분위')
+        st.subheader(f"{idx.getIdx()}quantile() - 분위")
         st.write('**Quantile이란 주어진 데이터를 동등한 크기로 분할하는 지점**Quantile이란 주어진 데이터를 동등한 크기로 분할하는 지점을 말합니다.')
         st.write('10%의 경우 0.1을, 80%의 경우 0.8을 대입하여 값을 구합니다.')
         st.code('''# 10% quantile\ndf['age'].quantile(0.1)''')
@@ -1359,19 +1378,19 @@ def show_section(topic, chapter, section):
 
         st.divider()
 
-        st.subheader('unique() - 고유값, nunique() - 고유값 개수')
+        st.subheader(f"{idx.getIdx()}unique() - 고유값, nunique() - 고유값 개수")
         st.write('고유값과 고유값의 개수를 구하고자 할 때 사용합니다.')
 
         st.write('**unique()**')
         st.code('''df['who'].unique()''')
-        st.write(df['who'].unique())    
+        st.write(df['who'].unique())   
         st.divider()
         st.write('**nonique()**: 고유값의 개수를 출력합니다.')
         st.code('''df['who'].nunique()''')
         st.write(df['who'].nunique())
         st.divider()
 
-        st.subheader('cumsum() - 누적합, cumprod() - 누적곱')
+        st.subheader(f"{idx.getIdx()}cumsum() - 누적합, cumprod() - 누적곱")
 
         st.write('누적되는 합계를 구할 수 있습니다.')
         st.code('''df['age'].cumsum()''')
@@ -1384,7 +1403,7 @@ def show_section(topic, chapter, section):
         st.write(df['age'].cumprod())
         st.divider()
 
-        st.subheader('corr() - 상관관계')
+        st.subheader(f"{idx.getIdx()}corr() - 상관관계")
         st.write(':blue-background[corr()]로 컬럼(column)별 **상관관계**를 확인할 수 있습니다.')
 
         st.write('- **-1~1 사이의 범위**를 가집니다.')
