@@ -2433,7 +2433,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
         st.divider()
 
-        st.subheader('mean() - 평균')
+        st.subheader(f"{idx.getSubIdx()}mean() - 평균")
 
         st.write('데이터의 **평균**')
         st.write('DataFrame 평균')
