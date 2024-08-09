@@ -1625,7 +1625,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
         st.write(df.loc[cond])
         st.divider()
 
-        st.write('**01-7. 나이 컬럼**만 가져옵니다.')
+        st.write('**07. 나이 컬럼**만 가져옵니다.')
         with st.echo():
             df.loc[cond, 'age']
         st.divider()
