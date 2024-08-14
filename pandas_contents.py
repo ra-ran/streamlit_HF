@@ -4959,6 +4959,8 @@ df_summary.head()
 
     elif path == ("실습 프로젝트", "지역별 음식점 소비 트렌드 분석"):
 
+           elif path == ("실습 프로젝트", "지역별 음식점 소비 트렌드 분석"):
+
         # 한글폰트 적용
         # 폰트 적용#########################################추가부분
         import os
@@ -5151,7 +5153,9 @@ df_seoul.head()''')
 import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-%matplotlib inline
+from matplotlib import rc
+
+rc('font', family='Malgun Gothic')
 
 # 유니코드에서  음수 부호설정
 mpl.rc('axes', unicode_minus=False)''')
@@ -5159,11 +5163,12 @@ mpl.rc('axes', unicode_minus=False)''')
         import pandas as pd
         import matplotlib as mpl
         import matplotlib.pyplot as plt
+        from matplotlib import rc
+
+        rc('font', family='Malgun Gothic')
         
         mpl.rc('axes', unicode_minus=False)
 
-        st.code('''# 한글 지원 라이브러리 설치
-!pip install koreanize-matplotlib''')
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}서울시 데이터 불러오기")
@@ -5449,7 +5454,7 @@ plt.show()''')
         plt.title('서울특별시', fontproperties=prop)
         plt.bar(df_seoul.SIGNGU_NM, df_seoul.식당수, color='green', label='음식점수')
         plt.legend(bbox_to_anchor=(0.15, 1.22), prop=prop)
-        plt.xticks(rotation=-45)
+        plt.xticks(rotation=-45, fontproperties=prop)
 
         y_right = plt.twinx()
         y_right.plot(df_seoul.SIGNGU_NM, df_seoul.식당비율, color='purple', marker='o', label='인구 수 대비 음식점')
@@ -5485,9 +5490,16 @@ plt.show()''')
         st.header(f"{idx.getHeadIdx()}결론 도출")
         
         st.subheader(f"{idx.getSubIdx()}음식점 소비 트렌드 기반 분석 결과")
+        st.write('1. 지역별 특성')
         st.write('- 서울시에서 식당이 가장 많은 곳은 **강남구**입니다.')
         st.write('- 서울시에서 인구수가 가장 많은 곳은 **송파구**입니다.')
         st.write('- 서울시 인구 100명 당 식당 비율이 가장 높은 곳은 **중구**입니다.')
+        st.write('\n')
+        st.write('2. 인구와 식당 수의 관계 ')
+        st.write('- 인구수가 많다고 해서 반드시 식당 수가 많은 것은 아니었습니다.')
+        st.write('- **주거 중심** vs **상업 중심**에 따라 차이가 있음을 알 수 있습니다.')
+        st.write('- 중구와 같이 주거 인구는 적지만, 식당 비율이 높은 지역은 유동인구나 관광객의 영향이 큰 것으로 보입니다.')
+
         st.divider()
         
         st.subheader(f"{idx.getSubIdx()}분석 결과 활용법")
