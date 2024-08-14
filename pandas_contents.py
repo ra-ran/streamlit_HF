@@ -2372,7 +2372,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                             data=template_sec,
                            file_name = "gas_second_2019.csv"
             )
-        st.write('다운 받은 데이터를 현재 작업 중인 jupyter 디렉터리로 이동해주세요')
+        st.write('※다운 받은 데이터는 소스코드와 같은 파일(경로)에 있거나 전체 경로를 작성해줘야 합니다.')
 
 
         st.divider()
@@ -4959,8 +4959,6 @@ df_summary.head()
 
     elif path == ("실습 프로젝트", "지역별 음식점 소비 트렌드 분석"):
 
-           elif path == ("실습 프로젝트", "지역별 음식점 소비 트렌드 분석"):
-
         # 한글폰트 적용
         # 폰트 적용#########################################추가부분
         import os
@@ -5482,8 +5480,9 @@ df_거주자순['인구수'].plot(kind='pie', label='', autopct='%.1f%%', starta
 plt.show()''')
 
         plt.figure(figsize=(8,8), dpi=100)
-        df_거주자순['인구수'].plot(kind='pie', label='', autopct='%.1f%%', startangle = 45, labels=df_거주자순['SIGNGU_NM'], cmap='rainbow')
-        plt.xticks(fontproperties=prop)
+        df_거주자순['인구수'].plot(kind='pie', label='', autopct='%.1f%%', startangle = 45, labels=df_거주자순['SIGNGU_NM'], cmap='rainbow', textprops={'font': prop})
+        
+        # plt.rc('font', family='Malgun Gothic')
         st.pyplot(plt)
         st.divider()
 
