@@ -1,10 +1,15 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
 import matplotlib.pyplot as plt
-plt.rcParams['font.family'] ='Malgun Gothic'
-plt.rcParams['axes.unicode_minus'] =False
+import os
+import io
+from matplotlib import font_manager as fm
+fpath = os.path.join(os.getcwd(), "customfont/NanumGothic-Regular.ttf")
+# fpath = os.path.join(os.getcwd(), "customfont/AppleGothic.ttf")
+prop = fm.FontProperties(fname=fpath)
 import numpy as np
-
+import seaborn as sns
+from streamlit_float import *
 
 class IndexAllocator:
     def __init__(self):
@@ -31,9 +36,9 @@ def load_contents() :
     contents = {
         "파이썬 기초": ["자료형", "제어문", "고급"],
         "Pandas 기초": ["DataFrame", "Excel/CSV", "Data 전처리", "Data 연결과 병합", "Static"],
-        "Matplotlib 기초":["Matplotlib 기본", "그래프 그리기?", "그래프에 text", "그래프", "스타일 세부 설정", 
-                         "Grid, Annotate", "Plot", "막대 그래프", "이외?"],
-        "실습 프로젝트":["대기오염 데이터 분석", "지역별 음식점 소비 트렌드 분석"],
+        "Matplotlib 기초":["Matplotlib 기본", "그래프 그리기", "그래프에 text", "그래프 세부 속성", "스타일 세부 설정", 
+                         "Grid, Annotate", "다양한 Plot", "막대 그래프", "Pie chart, 3D plot"],
+        "실습 프로젝트":["대기오염 데이터 분석", "지역별 음식점 소비 트렌드 분석", "날씨별 공공자전거 수요 분석"],
     }
     topics = list(contents.keys())
     return contents, topics
@@ -89,9 +94,10 @@ matplotlib.pyplot 모듈의 각각의 함수를 사용해서 그래프 영역을
     table = [st.columns(3)] * ((len(chapters) + 2) // 3)
     for i, title in enumerate(chapters):
         with table[i // 3][i % 3]:
+            formatted_title = title.replace(" ", "<br>")
             card = st.container(height=200, border=True)
             subcard = card.container(height=110, border=False)
-            subcard.subheader(title)
+            subcard.markdown(f"<h3 style='text-align: left;'>{formatted_title}</h3>", unsafe_allow_html=True)
 
             card.button("학습하기", 
                         key=f"btn_{i}",
@@ -105,7 +111,7 @@ def pandas_dataset():
         with st.echo():
             import seaborn as sns
             df = sns.load_dataset('titanic')
-            df
+            df.head()
 
         st.subheader(f"{idx.getSubIdx()}컬럼(columns) 설명")
         st.markdown('- survived: 생존여부 (1: 생존, 0: 사망)\n'
@@ -132,7 +138,7 @@ def show_chapter(topic, chapter):
     ### Python 컨텐츠 작성
     if path == ("파이썬 기초", "자료형") :
         st.header(f"{idx.getHeadIdx()}숫자형")
-        st.write("숫자형에는 정수형(Integer)과 실수형(Float)이 있습니다. 정수는 양의 정수와 음의 정수, 0이 될 수 있는 숫자입니다. 실수는 소수점이 포함된 숫자를 의미합니다.")
+        st.write("숫자형에는 **정수형**(Integer)과 **실수형**(Float)이 있습니다. 정수는 양의 정수와 음의 정수, 0이 될 수 있는 숫자입니다. 실수는 소수점이 포함된 숫자를 의미합니다.")
         st.code('''
                 #정수형(Integer)
                 a = 123
@@ -141,7 +147,7 @@ def show_chapter(topic, chapter):
                 #실수형(Floating)
                 a = 3.14
                 b = 100.0
-                ''')
+                ''',line_numbers=True)
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}숫자형의 연산 - 산술 연산자")
@@ -181,7 +187,7 @@ def show_chapter(topic, chapter):
 
                 print( a % b )
                 #출력 : 1
-                ''')
+                ''',line_numbers=True)
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}숫자형의 연산 - 복합 연산자")
@@ -238,7 +244,7 @@ def show_chapter(topic, chapter):
                 a %= 9  #a = a % 9
                 print(a)
                 #출력 : 4
-                ''')
+                ''',line_numbers=True)
         st.divider()
         
         st.header(f"{idx.getHeadIdx()}문자열")
@@ -251,19 +257,19 @@ def show_chapter(topic, chapter):
                 str2 = 'Python is Easy'
                 print(str2)
                 #출력 : Python is Easy
-                ''')
+                ''',line_numbers=True)
         st.divider()
         st.subheader(f"{idx.getSubIdx()}문자열 길이 구하기")
-        st.write("문자열의 길이는 다음과 같이 len 함수를 사용하면 구할 수 있습니다.")
+        st.write("문자열의 길이는 다음과 같이 **len** 함수를 사용하면 구할 수 있습니다.")
         st.code('''
                 a = "Life is too short"
                 print(len(a))
                 #출력 : 17
-                ''')
+                ''',line_numbers=True)
         st.divider()
         
         st.subheader(f"{idx.getSubIdx()}문자열 인덱싱")
-        st.write("인덱싱이란 문자열에서 문자를 추출하는 것입니다. 문자열의 문자에 접급하기 위해서 '문자열[인덱스]' 형식으로 접든할 수 있습니다. 이때 인덱스는 0부터 시작합니다.")
+        st.write("인덱싱이란 문자열에서 문자를 추출하는 것입니다. 문자열의 문자에 접근하기 위해서 '**문자열[인덱스]**' 형식으로 접근할 수 있습니다. 이때 인덱스는 0부터 시작합니다.")
         st.code('''
                 str = "Hello World"
                 
@@ -271,7 +277,7 @@ def show_chapter(topic, chapter):
                 print(str[3])   #출력 : l
                 print(str[-1])   #출력 : d
                 print(str[-5])   #출력 : W
-                ''')
+                ''',line_numbers=True)
         st.write("인덱스의 (-) 는 문자열을 뒤에서부터 읽기 위해 사용합니다. 즉, str[-1]은 뒤에서 첫 번째가 되는 문자를 의미하며, str[-5]는 뒤에서 5번째 문자를 의미합니다.")
         st.divider()
 
@@ -280,13 +286,13 @@ def show_chapter(topic, chapter):
                  
                         문자열[start : end : step]
                 
-start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 의미합니다. step의 기본 값은 1으로 생략 가능합니다.
+**start**는 시작 인덱스, **end**는 끝 인덱스, **step**은 슬라이싱 간격을 의미합니다. step의 기본 값은 1으로 생략 가능합니다.
                  ''')
         st.code('''
                 str = "Life is too short, You need Python"
                 print(str[0:4])
                 # 출력 : Life
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 슬라이싱할 때 start를 생략하면 처음부터 end까지, end를 생략하면 start부터 끝까지 문자열을 추출합니다.
@@ -301,7 +307,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 # end 생략
                 print(str[ -6: ])
                 # 출력 : Python
-                ''')
+                ''',line_numbers=True)
         st.divider()
         st.subheader(f"{idx.getSubIdx()}문자열 관련 함수")
         st.write('''
@@ -311,7 +317,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 a = "hobby"
                 print( a.count('b') )   #문자열 중 문자 b의 개수 리턴
                 #출력 : 2
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - **find()** : 위치 알려 주기1
@@ -323,7 +329,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                 print( a.find('k') )   #찾는 문자나 문자열이 존재하지 않는다면 -1을 리턴
                 #출력 : -1
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - **index()** : 위치 알려 주기2
@@ -337,7 +343,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 #Traceback (most recent call last):
                 #File "<stdin>", line 1, in <module>
                 #ValueError: substring not found
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - **join()** : 문자열 삽입
@@ -345,7 +351,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
         st.code('''
                 print( ",".join('abcd') )   #abcd 문자열의 각각의 문자 사이에 ‘,’를 삽입
                 #출력 : a,b,c,d
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - **upper()** : 소문자를 대문자로 바꾸기
@@ -354,7 +360,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 a = "hi"
                 print( a.upper() )
                 #출력 : 'HI'
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - **lower()** : 대문자를 소문자로 바꾸기
@@ -363,7 +369,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 a = "HELLO"
                 print( a.lower() )
                 #출력 : 'hello'
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - **lstrip()** : 왼쪽 공백 지우기
@@ -372,25 +378,25 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 a = "  hi  "
                 print( a.lstrip() )
                 #출력 : 'hi  '
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - **rstrip()** : 오른쪽 공백 지우기
                  ''')
         st.code('''
                 a = "  hi  "
-                print( a.lstrip() )
+                print( a.rstrip() )
                 #출력 : '  hi'
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - **strip()** : 양쪽 공백 지우기
                  ''')
         st.code('''
                 a = "  hi  "
-                print( a.lstrip() )
+                print( a.strip() )
                 #출력 : 'hi'
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - **replace()** : 문자열 바꾸기
@@ -399,8 +405,8 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 a = "Good mornig"
                 print( a.replace("mornig", "evening") )  #replace(바뀔_문자열, 바꿀_문자열)
                 #출력 : Good evening
-                ''')
-        st.write("replace 함수는 eplace(바뀔_문자열, 바꿀_문자열)처럼 사용해서 문자열 안의 특정한 값을 다른 값으로 치환해 줍니다.")
+                ''',line_numbers=True)
+        st.write("replace 함수는 replace(바뀔_문자열, 바꿀_문자열)처럼 사용해서 문자열 안의 특정한 값을 다른 값으로 치환해 줍니다.")
         st.write('''
                 - **split()** : 문자열 나누기
                  ''')
@@ -412,13 +418,13 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 b = "a:b:c:d"
                 print( b.split(':') )
                 #출력 : ['a', 'b', 'c', 'd']
-                ''')
+                ''',line_numbers=True)
         st.write("split 함수는 a.split()처럼 괄호 안에 아무 값도 넣어 주지 않으면 공백([Space], [Tab], [Enter])을 기준으로 문자열을 나누어 줍니다. 만약 b.split(':')처럼 괄호 안에 특정 값이 있을 경우에는 괄호 안의 값을 구분자로 해서 문자열을 나누어 줍니다.")    
         st.divider()
         
         st.header(f"{idx.getHeadIdx()}불")
         st.write('''
-                불(bool)이란 참(True)과 거짓(False)을 나타내는 자료형입니다. 불 자료형은 다음 2가지 값만을 가질 수 있습니다.
+                불(bool)이란 **참**(True)과 **거짓**(False)을 나타내는 자료형입니다. 불 자료형은 다음 2가지 값만을 가질 수 있습니다.
 
                 - True: 참을 의미한다.
                 - False: 거짓을 의미한다.
@@ -436,7 +442,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 a = 5 < 3
                 print(a)
                 #출력 : False
-                ''')
+                ''',line_numbers=True)
         st.divider()
         st.subheader(f"{idx.getSubIdx()}자료형의 참과 거짓")
         st.write('''
@@ -480,7 +486,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 a = [1,2,['P',3]]  #리스트 안에 입력된 리스트
                 print(a)
                 #출력 : [1, 2, ['P', 3]]
-                ''')
+                ''',line_numbers=True)
         st.divider()
         st.subheader(f"{idx.getSubIdx()}리스트의 인덱싱")
         st.write("리스트 역시 문자열처럼 인덱싱을 적용할 수 있습니다.")
@@ -495,7 +501,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                 print( a[-1] )
                 #출력 : 3
-                ''')
+                ''',line_numbers=True)
         
         st.write("리스트 안에 리스트가 있는 경우에도 인덱싱이 가능합니다.")
         st.code('''
@@ -509,7 +515,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                 print( a[-1][1] )
                 #출력 : 'b'
-                ''')
+                ''',line_numbers=True)
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}리스트의 슬라이싱")
@@ -524,15 +530,15 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                 print(a[2:])
                 #출력 : [3, 4, 5]
-                ''')
+                ''',line_numbers=True)
         st.divider()
         st.subheader(f"{idx.getSubIdx()}리스트 길이 구하기")
-        st.write("리스트 길이를 구하기 위해서는 다음처럼 len 함수를 사용해야 합니다.")
+        st.write("리스트 길이를 구하기 위해서는 다음처럼 **len** 함수를 사용해야 합니다.")
         st.code('''
                 a = [1, 2, 3]
                 print(len(a))
                 #출력 : 3
-                ''')
+                ''',line_numbers=True)
         st.write("len은 문자열, 리스트 외에 앞으로 배울 튜플과 딕셔너리에도 사용할 수 있는 함수입니다.")
         
         st.divider()
@@ -544,17 +550,17 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                 print(a)
                 #출력 : [1, 2, 4]
-                ''')
+                ''',line_numbers=True)
         st.divider()
         st.subheader(f"{idx.getSubIdx()}리스트 요소 삭제하기")
-        st.write("del 함수를 사용해 리스트의 요소를 삭제할 수 있습니다. 삭제 또한 인덱스를 통해 요소에 접근합니다.")
+        st.write("**del** 함수를 사용해 리스트의 요소를 삭제할 수 있습니다. 삭제 또한 인덱스를 통해 요소에 접근합니다.")
         st.code('''
                 a = [1, 2, 3]
                 del a[1]
 
                 print(a)
                 #출력 : [1, 3]
-                ''')
+                ''',line_numbers=True)
         st.write("다음처럼 슬라이싱 기법을 사용하여 리스트의 요소 여러 개를 한꺼번에 삭제할 수도 있습니다.")
         st.code('''
                 a = [1, 2, 3, 4, 5]
@@ -562,7 +568,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                 print(a)
                 #출력 : [1, 2]
-                ''')
+                ''',line_numbers=True)
         st.divider()
         st.subheader(f"{idx.getSubIdx()}리스트 관련 함수")
         st.write('''
@@ -573,13 +579,13 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 a.append(4)
                 print( a )   #리스트의 맨 마지막에 4를 추가
                 #출력 : [1, 2, 3, 4]
-                ''')
+                ''',line_numbers=True)
         st.write("리스트 안에는 어떤 자료형도 추가할 수 있습니다.")
         st.code('''
                 a.append([5, 6])
                 print( a )   #리스트에 리스트를 추가
                 #출력 : [1, 2, 3, 4, [5, 6]]
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - **sort()** : 리스트 정렬
@@ -589,14 +595,14 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 a.sort()
                 print( a )
                 #출력 : [1, 2, 3, 4]
-                ''')
+                ''',line_numbers=True)
         st.write("문자 역시 알파벳 순서로 정렬할 수 있습니다.")
         st.code('''
                 a = ['a', 'c', 'b']
                 a.sort()
                 print( a )
                 #출력 : ['a', 'b', 'c']
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - **reverse()** : 리스트 뒤집기
@@ -606,7 +612,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 a.reverse()
                 print( a )
                 #출력 : ['b', 'c', 'a']
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - **index()** : 인덱스 반환
@@ -623,7 +629,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 #Traceback (most recent call last):
                 #    File "<stdin>", line 1, in <module>
                 #ValueError: 0 is not in list
-                ''')
+                ''',line_numbers=True)
         st.write("값 0은 a 리스트에 존재하지 않기 때문에 오류가 발생합니다.")
 
         st.write('''
@@ -638,7 +644,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 a.insert(3, 5)      #3번째 자리에 5 삽입
                 print( a )
                 #출력 : [4, 1, 2, 5, 3]
-                ''')
+                ''',line_numbers=True)
         st.write("insert(a, b)는 리스트의 a번째 위치에 b를 삽입합니다.")
         
         st.write('''
@@ -649,7 +655,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 a.remove(3)
                 print( a )
                 #출력 : [1, 2, 1, 2, 3]
-                ''')
+                ''',line_numbers=True)
         st.write("remove(x)는 리스트에서 첫 번째로 나오는 x를 삭제하는 함수입니다. a가 3이라는 값을 2개 가지고 있을 경우, 첫 번째 3만 제거됩니다.")
 
         st.write('''
@@ -662,7 +668,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                 print( a )
                 #출력 : [1, 2]
-                ''')
+                ''',line_numbers=True)
         st.write("pop()은 리스트의 맨 마지막 요소를 리턴하고 그 요소는 삭제합니다. a리스트에서 3을 끄집어 내고, [1, 2]만 남게 됩니다.")
         st.code('''
                 a = [1, 2, 3]
@@ -671,7 +677,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                 print( a )
                 #출력 : [1, 3]
-                ''')
+                ''',line_numbers=True)
         st.write("pop(x)은 리스트의 x번째 요소를 리턴하고 그 요소는 삭제합니다. a리스트에서 a[1]의 값을 끄집어 내고, [1, 3]만 남게 됩니다.")
         
         st.write('''
@@ -681,7 +687,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 a = [1, 2, 3, 1]
                 print( a.count(1) )    #1이라는 값이 a에 총 2개
                 #출력 : 2
-                ''')
+                ''',line_numbers=True)
         st.write("count(x)는 리스트 안에 x가 몇 개 있는지 조사하여 그 개수를 리턴하는 함수입니다.")
         
         st.write('''
@@ -697,13 +703,13 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 a.extend(b)
                 print(a)
                 #출력 : [1, 2, 3, 4, 5, 6, 7]
-                ''')
+                ''',line_numbers=True)
         st.write("extend(x)에서 x에는 리스트만 올 수 있으며 원래의 a 리스트에 x 리스트를 더하게 됩니다.") 
         st.divider()
         
         st.header(f"{idx.getHeadIdx()}튜플")
         st.write('''
-                튜플(Tuple)은 몇 가지 점을 재외하곤 리스트와 거의 비슷하며 리스트와 다른 점은 다름과 같습니다.
+                튜플(Tuple)은 몇 가지 점을 재외하곤 리스트와 거의 비슷하며 리스트와 다른 점은 다음과 같습니다.
                 
                 - 리스트는 [], 튜플은 ()으로 둘러싼다.
                 - 리스트는 요솟값의 생성, 삭제, 수정이 가능하지만, 튜플은 요솟값을 바꿀 수 없다.
@@ -716,7 +722,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 t3 = (1, 2, 3)
                 t4 = 1, 2, 3
                 t5 = ('a', 'b', ('ab', 'cd'))
-                ''')
+                ''',line_numbers=True)
         st.write('''
                 모습은 리스트와 거의 비슷하지만, 튜플에서는 리스트와 다른 2가지 차이점을 찾아볼 수 있습니다. t2 = (1,)처럼 단지 1개의 요소만을 가질 때는 요소 뒤에 쉼표(,)를 반드시 붙여야 한다는 것과 t4 = 1, 2, 3처럼 소괄호()를 생략해도 된다는 점입니다.
                  ''')
@@ -732,7 +738,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                 print(t1[3])
                 # 출력 : 'b'
-                ''')
+                ''',line_numbers=True)
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}튜플의 슬라이싱")
@@ -741,7 +747,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                 print(t1[1:])
                 # 출력 : (2, 'a', 'b')
-                ''')
+                ''',line_numbers=True)
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}튜플 길이 구하기")
@@ -749,12 +755,12 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 t1 = (1, 2, 'a', 'b')
                 print(len(t1))
                 #출력 : 4
-                ''')   
+                ''',line_numbers=True)
         st.divider()
         
         st.header(f"{idx.getHeadIdx()}딕셔너리")
         st.write('''
-                딕셔너리(dictionary)란 단어 그대로 '사전'이라는 뜻입니다. 딕셔너리의 기본 구조는 아래와 같이 Key와 Value를 한 쌍으로 가지며, 리스트나 튜플처럼 순차적으로 해당 요솟값을 구하지 않고 Key를 통해 Value를 얻는 특징을 가집니다.
+                딕셔너리(dictionary)란 단어 그대로 '사전'이라는 뜻입니다. 딕셔너리의 기본 구조는 아래와 같이 **Key**와 **Value**를 한 쌍으로 가지며, 리스트나 튜플처럼 순차적으로 해당 요솟값을 구하지 않고 Key를 통해 Value를 얻는 특징을 가집니다.
         
                     {Key1: Value1, Key2: Value2, Key3: Value3, ...}
                 
@@ -777,7 +783,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                     "age" : 30,
                     "city" : "New York"
                 }
-                ''')
+                ''',line_numbers=True)
         
         st.write("딕셔너리는 Key - Value 로 이루어진 데이터 타입이기 때문에 리스트와 같이 인덱스를 사용해서 요소에 접근할 수 없습니다. 딕셔너리의 특정 요소에 접근하기 위해선 지정된 '키' 값을 이용해야 합니다.")
         st.code('''
@@ -787,7 +793,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                 print(person["age"])
                 #출력 : 30
-                ''')
+                ''',line_numbers=True)
         st.divider()
         st.subheader(f"{idx.getSubIdx()}딕셔너리 쌍 추가, 삭제하기")
         st.code('''
@@ -800,7 +806,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 del person["city"]
                 print(person)
                 #출력 : {'name': 'Alice', 'age': 30, 'job': 'Chef'}
-                ''')
+                ''',line_numbers=True)
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}딕셔너리 관련 함수")
@@ -810,7 +816,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
         st.code('''
                 print(person.keys())
                 #출력 : dict_keys(['name', 'age', 'job'])
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - **values()** : Value 리스트 만들기
@@ -818,7 +824,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
         st.code('''
                 print(person.values())
                 #출력 : dict_values(['Alice', 30, 'Chef'])
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - **items()** : Key, Value 쌍 얻기
@@ -826,7 +832,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
         st.code('''
                 print(person.items())
                 #출력 : dict_items([('name', 'Alice'), ('age', 30), ('job', 'Chef')])
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - **get()** : Key로 Value 얻기
@@ -834,7 +840,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
         st.code('''
                 print(person.get("name"))
                 #출력 : Alice
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - **in()** : 해당 Key가 딕셔너리 안에 있는지 조사하기
@@ -845,14 +851,14 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                 print("birth" in person)
                 #출력 : False
-                ''')
+                ''',line_numbers=True)
         st.write('''
                 - **clear()** : Key: Value 쌍 모두 지우기
                  ''')
         st.code('''
                 print(person.clear())
                 #출력 : None
-                ''')
+                ''',line_numbers=True)
         st.divider()
         
         st.header(f"{idx.getHeadIdx()}집합")
@@ -864,21 +870,21 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 s2 = set("Hello")
                 print(s2)
                 # 출력 : {'e', 'H', 'l', 'o'}
-                ''')
+                ''',line_numbers=True)
         st.write('''
                 's2 = set("Hello")' 결과에서 확인할 수 있듯, set에는 다음과 같은 2가지 특징이 있습니다.
                  
                  - 중복을 허용하지 않는다.
                  - 순서가 없다(Unordered).
 
-                 set은 중복을 허용하지 않는 특징 때문에 데이터의 중복을 제거하기 위한 필터로 종종 사용됩니다. 또한, 리스트나 튜플은 순서가 있기(ordered) 때문에 인덱싱을 통해 요솟값을 얻을 수 있지만, set 자료형은 순서가 없기(unordered) 때문에 인덱싱을 통해 요솟값을 얻을 수 없습니다.
+                 set은 중복을 허용하지 않는 특징 때문에 데이터의 중복을 제거하기 위한 필터로 종종 사용됩니다. 또한, 리스트나 튜플은 순서가 있기 때문에 인덱싱을 통해 요솟값을 얻을 수 있지만, set 자료형은 순서가 없기 때문에 인덱싱을 통해 요솟값을 얻을 수 없습니다.
                  ''')
         st.subheader(f"{idx.getSubIdx()}집합의 연산")
         st.code('''
                 # 연산에 사용할 2개의 set 생성
                 s1 = set([1, 2, 3, 4, 5, 6])
                 s2 = set([4, 5, 6, 7, 8, 9])
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - **교집합** : & , intersection
@@ -889,7 +895,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                 print( s1.intersection(s2) )
                 #출력 : {4, 5, 6}
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - **합집합** : | , union
@@ -900,7 +906,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                 print( s1.union(s2) )
                 #출력 : {1, 2, 3, 4, 5, 6, 7, 8, 9}
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - **차집합** : -(빼기), difference
@@ -917,7 +923,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                 print( s2.difference(s1) )
                 #출력 : {8, 9, 7}
-                ''')
+                ''',line_numbers=True)
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}집합 관련 함수")
@@ -930,7 +936,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 
                 print( s1 )
                 #출력 : {1, 2, 3, 4}
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - **update()** : 값 여러 개 추가하기
@@ -941,7 +947,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 
                 print( s1 )
                 #출력 : {1, 2, 3, 4, 5, 6}
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - **remove()** : 특정 값 제거하기
@@ -952,8 +958,8 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 
                 print( s1 )
                 #출력 : {1, 3}
-                ''')
-    ################################################################################################################################################################################
+                ''',line_numbers=True)
+    
     elif path == ("파이썬 기초", "제어문") :
         st.header(f"{idx.getHeadIdx()}if문")
         st.subheader(f"{idx.getSubIdx()}if문 기본 구조")
@@ -1027,7 +1033,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 else :
                     print("str1과 str2는 같지 않다")
                 #출력 : str1과 str2는 같지 않다
-                ''')
+                ''',line_numbers=True)
         st.divider()
         st.subheader(f"{idx.getSubIdx()}조건문 유형 - and, or, not")
         st.write('''
@@ -1061,7 +1067,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                     print("False")
                 #출력 : True
 
-                ''')
+                ''',line_numbers=True)
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}조건문 유형 - in, not in")
@@ -1086,7 +1092,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 else :
                     print("False")
                 #출력 : True
-                ''')
+                ''',line_numbers=True)
         st.divider()
         
         st.header(f"{idx.getHeadIdx()}while문")
@@ -1115,17 +1121,17 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 
                 print(sum)
                 # 출력 : 55
-                ''')
+                ''',line_numbers=True)
         st.divider()
-
+        
         st.subheader(f"{idx.getSubIdx()}while 문 강제로 빠져나가기")
-        st.write("while 문은 조건문이 참인 동안 계속 while 문 안의 내용을 반복적으로 수행합니다. 하지만 강제로 while 문을 빠져나가고 싶은 경우엔 break를 사용해 반복문을 빠져나갈 수 있습니다.")
+        st.write("while 문은 조건문이 참인 동안 계속 while 문 안의 내용을 반복적으로 수행합니다. 하지만 강제로 while 문을 빠져나가고 싶은 경우엔 **break**를 사용해 반복문을 빠져나갈 수 있습니다.")
         st.write("아래 코드는 조건문이 True이기 때문에 무한 반복하게 됩니다.")
         st.code('''
                 a = 30
                 while True : #무한 반복
                     a -= 5
-                ''')
+                ''',line_numbers=True)
         st.write("while문을 강제로 빠져나오기 위해, 특정 조건을 만족할 경우 break를 사용하여 while문을 빠져나올 수 있습니다.")
         st.code('''
                 a = 30
@@ -1137,10 +1143,10 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                         break
                 print(a)
                 # 출력 : 5
-                ''')
+                ''',line_numbers=True)
         st.divider()
         st.subheader(f"{idx.getSubIdx()}while 문의 맨 처음으로 돌아가기")
-        st.write("while 문 안의 문장을 수행할 때 입력 조건을 검사해서 조건에 맞지 않으면 while 문을 빠져나갑니다. 그런데 프로그래밍을 하다 보면 while 문을 빠져나가지 않고 while 문의 맨 처음(조건문)으로 다시 돌아가게 만들고 싶은 경우가 생기게 되는데, 이때 사용하는 것이 바로 continue 문입니다.")
+        st.write("while 문 안의 문장을 수행할 때 입력 조건을 검사해서 조건에 맞지 않으면 while 문을 빠져나갑니다. 그런데 프로그래밍을 하다 보면 while 문을 빠져나가지 않고 while 문의 맨 처음(조건문)으로 다시 돌아가게 만들고 싶은 경우가 생기게 되는데, 이때 사용하는 것이 바로 **continue** 문입니다.")
         st.code('''
                 a = 0
                 while a < 10 :
@@ -1156,8 +1162,25 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 #5
                 #7
                 #9
-                ''')
+                ''',line_numbers=True)
         st.write("위는 1부터 10까지의 숫자 중 홀수만 출력하는 예시입니다. a가 10보다 작은 동안 a는 1만큼씩 계속 증가합니다. a % 2 == 0(a를 2로 나누었을 때 나머지가 0인 경우)이 참이 되는 경우는 a가 짝수인 경우입니다. 즉, a가 짝수이면 continue 문을 수행하게 됩니다. 이 continue 문은 while 문의 맨 처음인 조건문(a < 10)으로 돌아가게 하는 명령어입니다. 따라서 위 예에서 a가 짝수이면 print(a) 문장은 수행되지 않을 것입니다.")
+        st.divider()
+
+        st.subheader(f"{idx.getSubIdx()}while 문 리스트와 함께 사용하기")
+        st.write('''while 문은 조건문에는 수식이 아닌 리스트 자료형이 올 수 있습니다. 리스트의 경우 값이 비어 있으면([]) 거짓(False)이 되고 비어 있지 않으면 참(True)이 되기 때문입니다.''')
+        st.code('''
+                li = ["A", "B", "C", "D"]
+
+                while li :
+                    print(li.pop())
+                
+                #출력
+                # D
+                # C
+                # B
+                # A
+                ''',line_numbers=True)
+        st.write("**pop()** 함수는 리스트 요소의 마지막 값을 제거하고 반환합니다. 위 코드의 경우, 주어진 리스트의 값이 빌 때까지 마지막 값을 제거하는 반복문을 수행합니다.")
         st.divider()
         
         st.header(f"{idx.getHeadIdx()}for문")
@@ -1184,13 +1207,13 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 #one
                 #two
                 #three
-                ''')
+                ''',line_numbers=True)
         st.write("['one', 'two', 'three'] 리스트의 첫 번째 요소인 'one'이 먼저 i 변수에 대입된 후 print(i) 문장을 수행합니다. 다음에 두 번째 요소 'two'가 i 변수에 대입된 후 print(i) 문장을 수행하고 리스트의 마지막 요소까지 이것을 반복합니다.")
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}for문과 continue문")
         st.write('''
-                while 문에서 살펴본 continue 문을 for 문에서도 사용할 수 있습니다. 즉, for 문 안의 문장을 수행하는 도중 continue 문을 만나면 for 문의 처음으로 돌아가게 됩니다.
+                while 문에서 살펴본 continue 문을 for 문에서도 사용할 수 있습니다. 즉, for 문 안의 문장을 수행하는 도중 **continue** 문을 만나면 for 문의 처음으로 돌아가게 됩니다.
                  ''')
         st.code('''
                 for i in [10, 23, 17, 22, 12] :
@@ -1201,30 +1224,67 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                 #출력 :
                 # 23
                 # 17
-                ''')
+                ''',line_numbers=True)
         
         st.write("i의 값이 짝수인 경우 continue문이 수행되어 출력이 수행되지 않습니다.")
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}for문과 함께 자주 사용하는 range 함수")
-        st.write("for 문은 숫자 리스트를 자동으로 만들어 주는 range 함수와 함께 사용하는 경우가 많습니다. 다음은 range 함수의 간단한 사용법입니다.")
+        st.write("for 문은 숫자 리스트를 자동으로 만들어 주는 **range** 함수와 함께 사용하는 경우가 많습니다. 다음은 range 함수의 간단한 사용법입니다.")
         st.code('''
                 a = range(10)
 
                 print(a)
                 # 출력 : range(0, 10)
-                ''')
+                ''',line_numbers=True)
         st.write("range(10)은 0부터 10 미만의 숫자를 포함하는 range 객체를 만들어 줍니다. 시작 숫자와 끝 숫자를 지정하려면 range(시작_숫자, 끝_숫자) 형태를 사용하는데, 이때 끝 숫자는 포함되지 않습니다.")
         st.code('''
-                add = 0
-
                 for i in range(1, 11) :
-                    add += i
+                    print(i)
                 
-                print(add)
-                # 출력 : 55
-                ''')
-        st.write("range(1, 11)은 숫자 1부터 10까지(1 이상 11 미만)의 숫자를 데이터로 가지는 객체입니다. 따라서 위 예에서 i 변수에 숫자가 1부터 10까지 하나씩 차례로 대입되면서 add += i 문장을 반복적으로 수행하고 add 최종적으로 55가 됩니다.")
+                # 출력
+                # 1
+                # 2
+                # 3
+                # 4
+                # 5
+                # 6
+                # 7
+                # 8
+                # 9
+                # 10
+                ''',line_numbers=True)
+        st.divider()
+        st.subheader(f"{idx.getSubIdx()}for문과 함께 자주 사용하는 enumerate 함수")
+        st.write("for 문 사용 시 몇 번째 반복문인지 확인이 필요할 경우가 있습니다. 이때 **enumerate** 함수를 사용해 인덱스 번호와 리스트의 값을 함께 반환할 수 있습니다.")
+        st.code('''
+                num = ["zero", "one", "two", "three", "four", "five"]
+
+                for idx, n in enumerate(num) :
+                        print(idx, n)
+                # 출력
+                # 0 zero
+                # 1 one
+                # 2 two
+                # 3 three
+                # 4 four
+                # 5 five
+                ''',line_numbers=True)
+        st.write("start 인자를 사용해 인덱스를 0이 아닌 다른 숫자로 시작할 수 있습니다.")
+        st.code('''
+                letter = ["A", "B", "C", "D", "E"]
+
+                for idx, l in enumerate(letter, start=5) :
+                        print(idx, l)
+                # 출력
+                # 5 A
+                # 6 B
+                # 7 C
+                # 8 D
+                # 9 E
+                ''',line_numbers=True)
+        
+        
     
     elif path == ("파이썬 기초", "고급") :
         st.header(f"{idx.getHeadIdx()}함수")
@@ -1232,14 +1292,14 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}함수의 구조")
-        st.write('''def는 함수를 만들 때 사용하는 예약어이며, 함수 이름은 함수를 만드는 사람이 임의로 만들 수 있습니다. 함수 이름 뒤 괄호 안의 매개변수는 이 함수에 입력으로 전달되는 값을 받는 변수입니다. 이렇게 함수를 정의한 후 if, while, for 문 등과 마찬가지로 함수에서 수행할 문장을 입력합니다.''')
+        st.write('''**def**는 함수를 만들 때 사용하는 예약어이며, 함수 이름은 함수를 만드는 사람이 임의로 만들 수 있습니다. 함수 이름 뒤 괄호 안의 매개변수는 이 함수에 입력으로 전달되는 값을 받는 변수입니다. 이렇게 함수를 정의한 후 if, while, for 문 등과 마찬가지로 함수에서 수행할 문장을 입력합니다.''')
         st.code('''
                 def 함수명(매개변수):
                     수행할_문장1
                     수행할_문장2
                     ...
                     return 결과값
-                 ''')
+                 ''',line_numbers=True)
         
         st.write("다음의 함수명은 add이고 입력으로 a, b 2개의 값을 받으며 리턴값(출력값)은 2개의 입력값을 더한 값입니다.")
         st.code('''
@@ -1252,18 +1312,18 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                 print(z)
                 #출력 : 17
-                ''')
+                ''',line_numbers=True)
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}매개변수와 인수")
-        st.write("매개변수는 함수에 입력으로 전달된 값을 받는 변수, 인수는 함수를 호출할 때 전달하는 입력값을 의미합니다.")
+        st.write("**매개변수**는 함수에 입력으로 전달된 값을 받는 변수, 인수는 함수를 호출할 때 전달하는 입력값을 의미합니다.")
 
         st.code('''
                 def add(a, b):  # a, b는 매개변수
                     return a+b
 
                 print(add(3, 4))  # 3, 4는 인수
-                ''')
+                ''',line_numbers=True)
         st.divider()
         st.subheader(f"{idx.getSubIdx()}return(반환값)")
         st.write("함수는 들어온 입력값을 받은 후 처리를 하여 적절한 값을 리턴해 줍니다. 함수의 형태는 입력값과 리턴값의 존재 유무에 딸 4가지 유형으로 나뉩니다.")
@@ -1277,7 +1337,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                 print(add(3, 4))
                 # 출력 : 7
-                ''')
+                ''',line_numbers=True)
         st.write('''
                 - 입력값이 없는 함수
                  ''')
@@ -1287,7 +1347,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                 print(say())
                 # 출력 : Hi
-                ''')
+                ''',line_numbers=True)
         
         st.write('''
                 - 리턴값이 없는 함수
@@ -1298,7 +1358,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                 add(3, 4)
                 # 출력 : 3, 4의 합은 7입니다.
-                ''')
+                ''',line_numbers=True)
         st.write('''
                 - 입력값도, 리턴값도 없는 함수
                  ''')
@@ -1308,11 +1368,11 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                 say()
                 # 출력 : Hi
-                ''')
+                ''',line_numbers=True)
         st.divider()
         st.subheader(f"{idx.getSubIdx()}lambda")
         st.write('''
-                 lambda는 함수를 생성할 때 사용하는 예약어로, def와 동일한 역할을 합니다. 보통 함수를 한 줄로 간결하게 만들 때 사용합니다. def를 사용해야 할 정도로 복잡하지 않거나 def를 사용할 수 없는 곳에 주로 사용됩니다.
+                 **lambda**는 함수를 생성할 때 사용하는 예약어로, def와 동일한 역할을 합니다. 보통 함수를 한 줄로 간결하게 만들 때 사용합니다. def를 사용해야 할 정도로 복잡하지 않거나 def를 사용할 수 없는 곳에 주로 사용됩니다.
                  
                         함수_이름 = lambda 매개변수1, 매개변수2, ... : 매개변수를_이용한_표현식
                  
@@ -1323,148 +1383,14 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                 print(result)
                 #출력 : 7
-                ''')
+                ''',line_numbers=True)
         st.write("add는 2개의 인수를 받아 서로 더한 값을 리턴하는 lambda 함수입니다. lambda로 만든 함수는 return 명령어가 없어도 표현식의 결과값을 리턴합니다.")
-        st.divider()
-
-        # st.header(f"{idx.getHeadIdx()}클래스")
-        # st.write('''
-        #          어떤 하나의 기능을 구현하는데 여러개의 함수가 필요할 때가 있습니다. 이때 데이터와 세부적인 기능을 수행하는 함수들을 묶어서 구현할 수 있는데 
-        #          이때 기본적으로 사용되는 것이 클래스입니다. 클래스는 상속 등의 다양한 기능을 통해 프로그램의 복잡도를 감소시켜주며 확장에 매우 유리하게 작용합니다.
-        #          ''')
-        # st.code('''
-        #         class 클래스_이름 : 
-        #                     def 함수_이름1(self) : 
-        #                         수행할 문장
-        #                         ...
-        #                     def 함수_이름2(self) : 
-        #                         수행할 문장
-        #                         ...
-        #         ''')
-        # st.divider()
-        # st.subheader(f"{idx.getSubIdx()}클래스와 객체")
-        # st.write('''
-        #         클래스와 객체는 '과자틀'과 '과자 틀로 찍어낸 과자'에 비유할 수 있습니다.
-        #         ''')
-        
-        # st.divider()
-
-        st.header(f"{idx.getHeadIdx()}모듈")
-        st.write('''
-                 모듈이란 함수나 변수 또는 클래스를 모아 놓은 파이썬 파일입니다. 모듈은 다른 파이썬 프로그램에서 불러와 사용할 수 있도록 만든 파이썬 파일이라고도 할 수 있습니다. 
-                 파이썬으로 프로그래밍을 할 때 매우 많은 모듈을 사용하며, 다른 사람들이 이미 만들어 놓은 모듈을 사용할 수도 있고 직접 만들어 사용할 수도 있습니다.''')
-        st.divider()
-
-        st.subheader(f"{idx.getSubIdx()}모듈 만들기")
-        st.write('''
-                아래와 같이 :blue-background[add]와 :blue-background[sub] 함수만 있는 파일 mod1.py를 만들고 :red-background[C:\\hfpy] 디렉터리에 저장합니다. 이 mod1.py 파일이 바로 모듈이 됩니다.
-                 ''')
-        st.code('''
-                # mod1.py
-                def add(a, b):
-                    return a + b
-
-                def sub(a, b): 
-                    return a-b
-                ''')
-        st.divider()
-
-        st.subheader(f"{idx.getSubIdx()}모듈 불러오기")
-        st.write('''
-                mod1.py를 저장한 :red-background[C:\\hfpy]에 새로운 py 파일을 생성해 봅시다. 이후 만들어둔 mod1.py 파일, 즉 모듈을 파이썬에서 불러와 사용하기 위해선 mod1.py를 저장한 :blue-background[import mod1]을 작성해 줍시다. 
-                (* import는 현재 디렉터리에 있는 파일이나 파이썬 라이브러리가 저장된 디렉터리에 있는 모듈만 불러올 수 있습니다.)
-                
-                         import 모듈_이름
-
-                import는 이미 만들어 놓은 파이썬 모듈을 사용할 수 있게 해 주는 명령어입니다. mod1.py 파일에 있는 add 함수를 사용하기 위해서는 mod1.add처럼 모듈 이름 뒤에 도트 연산자(.)를 붙이고 함수 이름을 쓰면 됩니다.
-                 ''')
-        st.code('''
-                import mod1
-                print(mod1.add(3, 4))
-                # 출력 : 7
-
-                print(mod1.sub(4, 2))
-                # 출력 : 2
-                ''')
-
-        st.write('''
-                여기에서 '모듈_이름'은 mod1.py에서 .py 확장자를 제거한 mod1만을 가리킵니다. 때로는 mod1.add, mod1.sub처럼 쓰지 않고 add, sub처럼 모듈 이름 없이 함수 이름만 쓰고 싶은 경우도 있을 것입니다.
-                이럴 때는 다음과 같이 사용할 수 있습니다.
-
-                        from 모듈_이름 import 모듈_함수
-                 
-                위와 같이 함수를 직접 import하면 모듈 이름을 붙이지 않고 바로 해당 모듈의 함수를 쓸 수 있습니다.
-                 ''')
-        st.code('''
-                #add 함수 하나만 사용
-                from mod1 import add
-                
-                print(add(3, 4))
-                # 출력 : 7
-                ''')
-        st.code('''
-                #2개 이상의 함수 불러오기
-                from mod1 import add, sub
-                
-                print(add(3, 4))
-                # 출력 : 7
-
-                print(sub(4, 2))
-                # 출력 : 2
-                ''')
-        st.write('''
-                모듈 내 모든 함수를 불러오고 싶을 때 :blue-background[*] 문자를 사용할 수 있습니다.
-                ''')
-        st.code('''
-                #모든 함수 불러오기
-                from mod1 import *
-                
-                print(add(3, 4))
-                # 출력 : 7
-
-                print(sub(4, 2))
-                # 출력 : 2
-                ''')
-        st.divider()
-        st.subheader(f"{idx.getSubIdx()}클래스나 변수 등을 포함한 모듈")
-        st.write('''
-                클래스나 변수 등을 포함할 수도 있습니다. 다음과 같은 mod2.py 파일을 작성해 봅시다.
-                 ''')
-        st.code('''
-                # mod2.py
-                PI = 3.141592
-
-                class Math: 
-                    def solv(self, r): 
-                        return PI * (r ** 2) 
-
-                def add(a, b): 
-                    return a+b 
-                ''')
-        st.write('''
-                mod2를 불러오기 위해 mod1.py를 저장한 디렉터리에 새로운 py파일을 작성해 봅시다.
-                 ''')
-        
-        st.code('''
-                import mod2
-                
-                print(mod2.PI)
-                # 출력 : 3.141592
-
-                a = mod2.Math()
-                print(a.solv(2))
-                # 출력 : 12.566368
-
-                print(mod2.add(mod2.PI, 4.4))
-                # 출력 : 7.541592
-                ''')
-        
         st.divider()
 
         st.header(f"{idx.getHeadIdx()}패키지")
         st.write('''
                 패키지는 모듈의 집합을 뜻합니다. 모듈은 하나의 .py 파이썬 파일, 패키지는 여러개의 .py 파일을 모아놓은 폴더 개념으로 생각할 수 있습니다.
-                파이썬 패키지 중 예로는 넘파이 (NumPy)와 Pandas (판다스)가 있습니다.
+                파이썬 패키지 중 예로는 넘파이(NumPy)와 Pandas(판다스)가 있습니다.
                 ''')
         st.divider()
 
@@ -1485,7 +1411,235 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
                         pip list
 
-                ''')
+                ''')    
+        st.divider()
+        st.subheader(f"{idx.getSubIdx()}패키지 호출하기")
+        st.write('''
+                설치한 패키지를 사용하기 위해선 **import**를 통해 호출해 불러와주어야 합니다. **import**문은 코드의 가장 상단에 작성해줍니다.
+
+                                import 패키지명
+                ''')    
+        st.write('''
+                패키지명이 너무 길면 **as** 를 사용하여 짧은 패키지 별명을 사용할 수 있습니다.
+                ''')    
+        st.code('''import pandas as pd''')
+        st.divider()
+
+        st.header(f"{idx.getHeadIdx()}NumPy")
+        st.write("**NumPy**는 대규모 다차원 배열과 행렬 연산에 필요한 다양한 함수와 메소드를 제공합니다. 데이터 분석, 데이터 처리, 선형 대수, 머신 러닝 등 다양한 분야에서 널리 사용되고 있습니다.")
+
+        st.divider()
+        st.subheader(f"{idx.getSubIdx()}기본 사용법")
+        st.write("아래 명령어를 사용하여 NumPy 패키지를 설치해줍니다.")
+        st.code("pip install numpy")
+
+        st.write("코드 가장 상단에 **import** 해주어 NumPy를 호출합니다.")
+        st.code("import numpy as np")
+        st.divider()
+
+        st.subheader(f"{idx.getSubIdx()}Array 만들기")
+        st.write("NumPy의 가장 기본적인 데이터 구조는 배열입니다. NumPy 배열은 동일한 타입의 데이터를 담는 다차원 배열입니다.")
+
+        st.code('''
+                # 1차원 배열
+                a = np.array([1, 2, 3])
+
+                print(a) 
+                #출력 : [1 2 3]
+
+                # 2차원 배열
+                b = np.array([[1, 2, 3], [4, 5, 6]])
+
+                print(b)
+                #출력
+                # [[1 2 3]
+                #  [4 5 6]]
+
+                # 3차원 배열
+                c = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+
+                print(c)
+                #출력
+                # [[[1 2]
+                #   [3 4]]
+
+                #  [[5 6]
+                #   [7 8]]]
+                ''',line_numbers=True)
+        
+        st.write("이렇게 생성된 배열의 크기는 **shape**속성을 통해 확인할 수 있습니다.")
+        st.code('''
+                print(a.shape)  # 출력 : (3,)
+                print(b.shape)  # 출력 : (2, 3)
+                print(c.shape)  # 출력 : (2, 2, 2)
+                ''',line_numbers=True)
+        st.divider()
+
+        st.subheader(f"{idx.getSubIdx()}NumPy 배열 연산")
+        st.write("NumPy 배열은 다른 배열 또는 스칼라와의 연산을 지원합니다. NumPy 배열의 연산은 배열의 **원소별**로 이루어집니다.")
+
+        st.code('''
+                a = np.array([1, 2, 3])
+                b = np.array([4, 5, 6])
+
+                # 원소별 덧셈
+                c = a + b
+                print(c)    # 출력 [5, 7, 9]
+
+                # 원소별 곱셈
+                d = a * b
+                print(d)    # 출력 [4, 10, 18]
+
+                # 스칼라와의 연산
+                e = a + 1  
+                print(e)    # 출력 [2, 3, 4]
+                ''',line_numbers=True)
+        st.write('''- **sum()** : 합계''')
+        st.code('''
+                a = np.array([1, 2, 3])
+
+                # 합계
+                b = np.sum(a)
+                print(b)  # 출력 6
+                ''',line_numbers=True)
+        
+        st.write('''- **mean()** : 평균''')
+        st.code('''
+                a = np.array([1, 2, 3])
+
+                b = np.mean(a)
+                print(b)  # 출력 2.0
+                ''',line_numbers=True)
+        
+        st.write('''- **min()** : 최소값''')
+        st.code('''
+                a = np.array([1, 2, 3])
+
+                b = np.min(a)
+                print(b)  # 출력 1
+                ''',line_numbers=True)
+        
+        st.write('''- **max()** : 최대값''')
+        st.code('''
+                a = np.array([1, 2, 3])
+
+                b = np.max(a)
+                print(b)  # 출력 3
+                ''',line_numbers=True)
+        st.divider()
+        st.subheader(f"{idx.getSubIdx()}Numpy 배열 인덱싱과 슬라이싱")
+        st.write("NumPy 배열의 인덱싱과 슬라이싱은 Python 리스트의 인덱싱과 슬라이싱과 매우 유사합니다. NumPy 배열의 인덱싱과 슬라이싱을 사용하여 배열의 일부를 선택할 수 있습니다.")
+        st.code('''
+                a = np.array([1, 2, 3, 4, 5])
+
+                # 인덱싱
+                b = a[0]
+                print(b)  # 출력 1
+
+                c = a[2]
+                print(c)  # 출력 3
+
+                # 슬라이싱
+                d = a[1:4]
+                print(d)  # 출력 [2, 3, 4]
+
+                e = a[:3]   
+                print(e)  # 출력 [1, 2, 3]
+
+                f = a[3:]   
+                print(f)  # 출력 [4, 5]
+                ''',line_numbers=True)
+        st.write("다차원 NumPy 배열에서는 각 차원의 인덱스를 콤마로 구분하여 인덱싱할 수 있습니다.")
+        st.code('''
+                a = np.array([[1, 2, 3], [4, 5, 6]])
+
+                # 인덱싱
+                b = a[0, 0]  
+                print(b)  # 출력 1
+
+                c = a[1, 2]  
+                print(c)  # 출력 6
+
+                # 슬라이싱
+                d = a[0, 1:3]  
+                print(d)  # 출력 [2, 3]
+
+                e = a[:, 1]    
+                print(e)  # 출력 [2, 5]
+
+                f = a[:, :2]   
+                print(f)  # 출력 [[1, 2], [4, 5]]
+                ''',line_numbers=True)
+        st.divider()
+        st.subheader(f"{idx.getSubIdx()}NumPy 배열 병합과 분리")
+        st.write("**concatenate()** 함수를 사용해 다차원 배열을 병합할 수 있습니다. concatenate() 함수는 병합할 배열을 첫 번째 인자로 전달하며, 두 개 이상의 배열을 병합할 경우에는 튜플 형태로 전달합니다. **axis** 인자를 사용하여 병합할 방향을 지정할 수 있습니다. axis 인자를 지정하지 않을 경우 기본값인 0으로 설정됩니다.")
+        st.code('''
+                a = np.array([1, 2, 3])
+                b = np.array([4, 5, 6])
+
+                # 배열 병합
+                c = np.concatenate((a, b))
+                print(c)  # 출력 [1, 2, 3, 4, 5, 6]
+                ''',line_numbers=True)
+        st.write("**axis=0**은 첫 번째 차원을 따라 배열을 병합한다는 의미입니다. 아래 코드의 경우 a와 b 배열이 첫 번째 차원을 공유하므로 axis=0으로 배열을 병합할 수 있습니다.")
+        st.code('''
+                a = np.array([[1, 2], [3, 4]])
+                b = np.array([[5, 6]])
+
+                # 배열 병합
+                c = np.concatenate((a, b), axis=0)  
+                print(c)    # 출력 [[1, 2], [3, 4], [5, 6]]
+                ''',line_numbers=True)
+        st.write("**split()** 함수를 사용해 다차원 배열을 분리할 수 있습니다. split() 함수는 분리할 배열과 분리할 인덱스를 전달하며, 분리할 인덱스는 분리될 배열의 첫 번째 차원을 따라 지정합니다.")
+        st.code('''
+                a = np.array([1, 2, 3, 4, 5, 6])
+
+                # 배열 분리
+                b, c = np.split(a, [3])  
+                print(b, c)    # 출력 [1, 2, 3], [4, 5, 6])
+                ''',line_numbers=True)
+        st.write("**axis=0**은 첫 번째 차원을 따라 배열을 분리한다는 의미입니다. 아래 코드의 경우 a의 첫 번째 행을 기준으로 배열을 분리합니다.")
+        st.code('''
+                a = np.array([[1, 2, 3], [4, 5, 6]])
+
+                # 배열 분리
+                b, c = np.split(a, [1], axis=0)  
+                print(b, c)    # 출력 [[1, 2, 3]], [[4, 5, 6]]
+                ''',line_numbers=True)
+        st.divider()
+        st.subheader(f"{idx.getSubIdx()}NumPy 관련 함수")
+        st.write("NumPy는 배열의 계산과 관련된 다양한 함수를 제공합니다.")
+
+        st.write('''- **np.zeros()** : 모든 원소가 0인 배열 생성''')
+        st.code('''
+                arr = np.zeros((2, 3))
+                print(arr)                
+                ''',line_numbers=True)
+        st.write('''- **np.ones()** : 모든 원소가 1인 배열 생성''')
+        st.code('''
+                arr = np.ones((2, 2))
+                print(arr)                
+                ''',line_numbers=True)
+        st.write('''- **np.arange()** : 범위 내의 일정 간격을 가진 배열 생성''')
+        st.code('''
+                arr = np.arange(1, 10, 2)   #범위가 1에서 10까지이고 간격이 2인 배열
+                print(arr)    #출력 [1 3 5 7 9]               
+                ''',line_numbers=True)
+        st.write('''- **np.linspace()** : 범위 내에서 균등 간격으로 원하는 개수의 배열 생성''')
+        st.code('''
+                arr = np.linspace(0, 1, 5)    #범위가 0에서 1까지이고 원하는 개수가 5개인 배열
+                print(arr)    #출력 [0.   0.25 0.5  0.75 1.  ]            
+                ''',line_numbers=True)
+        st.write('''- **np.random.random()** : 0부터 1사이의 난수를 가지는 배열 생성''')
+        st.code('''
+                arr = np.random.random((2, 2))  #크기 지정(2*2)
+                print(arr)    #출력 [[0.8180057  0.58944475] [0.71871027 0.70529442]]
+                ''',line_numbers=True)
+        st.write('''- **np.random.randn()** : 평균이 0이고 표준편차가 1인 정규 분포를 따르는 난수를 가지는 배열 생성''')
+        st.code('''
+                arr = np.random.randn(2, 2)  #크기 지정(2*4)
+                print(arr)    # 출력 [[-1.09887802  2.13154382] [-0.96512407 -0.37879234]]
+                ''',line_numbers=True)
     
     ### Pandas 컨텐츠 작성
     elif path == ("Pandas 기초", "DataFrame") :
@@ -1648,7 +1802,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
         st.write('index는 기본 설정된 **RangeIndex**가 출력됩니다.')
         with st.echo():
-            df.index
+            df.head().index
         st.divider()
 
         st.write('columns **열**을 출력합니다.')
@@ -1658,7 +1812,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
 
         st.write('values는 모든 값을 출력하며, **numpy array 형식**으로 출력됩니다.')
         with st.echo():
-            df.values
+            df.head().values
 
         st.header(f"{idx.getHeadIdx()}데이터프레임 정렬") ## 소단원04
 
@@ -1751,7 +1905,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
         st.write('boolean index을 만들어 조건에 맞는 데이터만 추출해 낼 수 있습니다.')
         st.code('''cond = (df['age'] >= 70)\ncond''')
         cond = (df['age'] >= 70)
-        st.write(cond)
+        st.write(cond.head())
         st.divider()
         st.code('''df.loc[cond]''')
         st.write(df.loc[cond])
@@ -1764,17 +1918,17 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
         cond1 = (df['fare'] > 30)
         cond2 = (df['who'] == 'woman')
         st.code('''df.loc[cond1 & cond2]''')
-        st.write(df.loc[cond1 & cond2])
+        st.write(df.head().loc[cond1 & cond2])
         st.divider()
 
         st.code('''df.loc[cond1 | cond2]''')
-        st.write(df.loc[cond1 | cond2])
+        st.write(df.head().loc[cond1 | cond2])
         st.divider()
 
         st.write('**06. 조건 필터 후 데이터 대입**')
         st.code('''cond = (df['age'] >= 70)\ncond''')
         cond = (df['age'] >= 70)
-        st.write(cond)
+        st.write(cond.head())
         st.divider()
         st.code('''#조건 필터\ndf.loc[cond]''')
         st.write(df.loc[cond])
@@ -1966,7 +2120,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
             df
             ''')
         df = pd.read_csv('data/서울시주민등록인구/seoul_population.csv')
-        st.write(df)
+        st.write(df.head())
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}CSV-저장하기") ## 소단원02 - 세부02
@@ -2093,7 +2247,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
         st.write('즉, :blue-background[loc]에 적용하여 조건 필터링을 걸 수 있습니다.')
         code = '''df.loc[df['age'].isnull()]'''
         st.code(code)
-        st.write(df.loc[df['age'].isnull()])
+        st.write(df.head().loc[df['age'].isnull()])
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}결측치 채우기 - fillna()")
@@ -2172,7 +2326,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
         st.write(''':blue-background[dropna()]로 **1개 라도 NaN 값이 있는 행**은 제거할 수 있습니다. :blue-background[(how='any')]''')
         code = '''df1.dropna()'''
         df1.dropna()
-        st.write(df1)
+        st.write(df1.head())
         st.divider()
 
         st.write('기본 옵션 값은 :blue-background[how=any]로 설정되어 있으며, 다음과 같이 변경할 수 있습니다.')
@@ -2182,7 +2336,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
         code = '''df1.dropna(how='all')'''
         st.code(code)
         df1.dropna(how='all')
-        st.write(df1)
+        st.write(df1.head())
 
         st.header(f"{idx.getHeadIdx()}column 추가") ## 소단원03
 
@@ -2240,7 +2394,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
         st.write('행 삭제시 **범위를 지정하여 삭제**할 수 있습니다.')
         code = 'df1.drop(np.arange(10))'
         st.code(code)
-        st.write(df1.drop(np.arange(10)))
+        st.write(df1.drop(np.arange(10)).head())
 
         st.write('**fancy indexing**을 활용하여 삭제할 수 있습니다.')
         code = 'df1.drop([1, 3, 5, 7, 9])'
@@ -2250,7 +2404,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}열 (column) 삭제")
-        st.code('df1.head()')
+        st.code('df1')
         st.write(df1.head())
         st.divider()
 
@@ -2372,7 +2526,7 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
                             data=template_sec,
                            file_name = "gas_second_2019.csv"
             )
-        st.write('※다운 받은 데이터는 소스코드와 같은 파일(경로)에 있거나 전체 경로를 작성해줘야 합니다.')
+        st.write('다운 받은 데이터를 현재 작업 중인 jupyter 디렉터리로 이동해주세요')
 
 
         st.divider()
@@ -2773,280 +2927,333 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
         st.code('''numeric_df.corr()['survived']''')
         st.write(numeric_df.corr()['survived']) 
         st.divider()
+    
     ### Matplotlib 컨텐츠 작성
     elif path == ("Matplotlib 기초", "Matplotlib 기본"):
+        import matplotlib.pyplot as plt
+        import numpy as np
         st.header(f"{idx.getHeadIdx()}기본 사용")
         st.write("Matplotlib 라이브러리를 이용해서 그래프를 그리는 일반적인 방법에 대해 소개합니다.")
         st.subheader(f"{idx.getSubIdx()}기본 그래프 그리기")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+import matplotlib.pyplot as plt
 
-            plt.plot([1, 2, 3, 4])
-            plt.show()
+plt.plot([1, 2, 3, 4])
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3, 4])
         st.pyplot(plt)
         plt.close()
         st.write("plot() 함수는 리스트의 값들이 y 값들이라고 가정하고, x 값 [0, 1, 2, 3]을 자동으로 만들어냅니다.")
         st.write("matplotlib.pyplot 모듈의 show() 함수는 그래프를 화면에 나타나도록 합니다.")
-        st.divider()
-        with st.echo():
-            import matplotlib.pyplot as plt
-
-            plt.plot([1, 2, 3, 4], [1, 4, 9, 16])
-            plt.show()
+        code = '''
+plt.plot([1, 2, 3, 4], [1, 4, 9, 16])
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
         st.write("plot() 함수는 다양한 기능을 포함하고 있어서, 임의의 개수의 인자를 받을 수 있습니다.")
         st.write("예를 들어, 아래와 같이 입력하면, x-y 값을 그래프로 나타낼 수 있습니다.")
+        plt.plot([1, 2, 3, 4], [1, 4, 9, 16])
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}스타일 지정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-
-            plt.plot([1, 2, 3, 4], [1, 4, 9, 16], 'ro')
-            plt.axis([0, 6, 0, 20])
-            plt.show()
+        code = '''
+plt.plot([1, 2, 3, 4], [1, 4, 9, 16], 'ro')
+plt.axis([0, 6, 0, 20])
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
         st.write("x, y 값 인자에 대해 선의 색상과 형태를 지정하는 포맷 문자열 (Format string)을 세번째 인자에 입력할 수 있습니다.")
         st.write("포맷 문자열 ‘ro’는 빨간색 (‘red’)의 원형 (‘o’) 마커를 의미합니다. 이후 스타일 관련 단원에서 더 자세하게 학습할 수 있습니다.")
         st.write("matplotlib.pyplot 모듈의 axis() 함수를 이용해서 축의 범위 [xmin, xmax, ymin, ymax]를 지정했습니다.")
+        plt.plot([1, 2, 3, 4], [1, 4, 9, 16], 'ro')
+        plt.axis([0, 6, 0, 20])
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}여러 개의 그래프 그리기")
         st.write("이후 다중 그래프 그리기 단원에서 자세히 학습할 수 있습니다.")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+import numpy as np
 
-            # 200ms 간격으로 균일하게 샘플된 시간
-            t = np.arange(0., 5., 0.2)
+# 200ms 간격으로 균일하게 샘플된 시간
+t = np.arange(0., 5., 0.2)
 
-            # 빨간 대쉬, 파란 사각형, 녹색 삼각형
-            plt.plot(t, t, 'r--', t, t**2, 'bs', t, t**3, 'g^')
-            plt.show()
+# 빨간 대쉬, 파란 사각형, 녹색 삼각형
+plt.plot(t, t, 'r--', t, t**2, 'bs', t, t**3, 'g^')
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+
+        t = np.arange(0., 5., 0.2)
+        plt.plot(t, t, 'r--', t, t**2, 'bs', t, t**3, 'g^')
         st.pyplot(plt)
         plt.close()
 
         st.header(f"{idx.getHeadIdx()}숫자 입력하기")
         st.subheader(f"{idx.getSubIdx()}기본 사용")
-        with st.echo():
-            import matplotlib.pyplot as plt
-
-            plt.plot([2, 3, 5, 10])
-            plt.show()
+        code = '''
+plt.plot([2, 3, 5, 10])
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([2, 3, 5, 10])
         st.write("`plot([2, 3, 5, 10])`와 같이 하나의 리스트 형태로 값들을 입력하면 y 값으로 인식합니다.")
-        # st.write("**plot((2, 3, 5, 10))** 또는 **plot(np.array(\[2, 3, 5, 10\]))**와 같이 파이썬 튜플 또는 Numpy 어레이의 형태로도 데이터를 입력할 수 있습니다.")
         st.write("""`plot((2, 3, 5, 10))` 또는 `plot(np.array([2, 3, 5, 10]))`와 같이 파이썬 튜플 또는 Numpy 어레이의 형태로도 데이터를 입력할 수 있습니다.""")
-
         st.write("**x** 값은 기본적으로 **[0, 1, 2, 3]** 이 되어서, **점 (0, 2), (1, 3), (2, 5), (3, 10)** 를 잇는 아래와 같은 꺾은선 그래프가 나타납니다.")
         st.pyplot(plt)
         plt.close()
         st.divider()
 
-        st.subheader(f"{idx.getSubIdx()}x, y 값 입력하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-
-            plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
-            plt.show()
+        st.subheader(f"{idx.getSubIdx()}X, Y 값 입력하기")
+        code = '''
+plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
         st.write("plot() 함수에 두 개의 리스트를 입력하면 순서대로 x, y 값들로 인식해서 점 (1, 2), (2, 3), (3, 5), (4, 10)를 잇는 꺾은선 그래프가 나타납니다.")
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}레이블이 있는 데이터 사용하기")
-        with st.echo(): 
-            import matplotlib.pyplot as plt
+        code = '''
+data_dict = {'data_x': [1, 2, 3, 4, 5], 'data_y': [2, 3, 5, 10, 8]}
 
-            data_dict = {'data_x': [1, 2, 3, 4, 5], 'data_y': [2, 3, 5, 10, 8]}
-
-            plt.plot('data_x', 'data_y', data=data_dict)
-            plt.show()
+plt.plot('data_x', 'data_y', data=data_dict)
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        data_dict = {'data_x': [1, 2, 3, 4, 5], 'data_y': [2, 3, 5, 10, 8]}
+        plt.plot('data_x', 'data_y', data=data_dict)
         st.write("파이썬 딕셔너리와 같이 레이블이 있는 데이터를 그래프로 나타낼 수 있습니다.")
         st.write("예제에서와 같이, 먼저 plot() 함수에 데이터의 레이블 (딕셔너리의 키)을 입력해주고, data 파라미터에 딕셔너리를 지정해줍니다.")
         st.pyplot(plt)
         plt.close()
     
-    elif path == ("Matplotlib 기초", "그래프 그리기?"):
+    elif path == ("Matplotlib 기초", "그래프 그리기"):
+        import matplotlib.pyplot as plt
+        import numpy as np
         st.header(f"{idx.getHeadIdx()}그래프 그리기")
         st.subheader(f"{idx.getSubIdx()}단일 그래프")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+import matplotlib.pyplot as plt
+import numpy as np
 
-            # data 생성
-            data = np.arange(1, 100)
-            # plot
-            plt.plot(data)
-            # 그래프를 보여주는 코드
-            plt.show()
+# data 생성
+data = np.arange(1, 100)
+# plot
+plt.plot(data)
+# 그래프를 보여주는 코드
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        data = np.arange(1, 100)
+        plt.plot(data)
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}다중 그래프(Multiple graphs)")
-        st.write("1개의 canvas 안에 다중 그래프 그리기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        st.write("- 1개의 canvas 안에 다중 그래프 그리기")
+        code = '''
+data = np.arange(1, 51)
+plt.plot(data)
 
-            data = np.arange(1, 51)
-            plt.plot(data)
+data2 = np.arange(51, 101)
+# plt.figure()
+plt.plot(data2)
 
-            data2 = np.arange(51, 101)
-            # plt.figure()
-            plt.plot(data2)
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        data = np.arange(1, 51)
+        plt.plot(data)
+        data2 = np.arange(51, 101)
+        plt.plot(data2)
+        st.pyplot(plt)
+        plt.close()
 
-            plt.show()
+        st.write("- 2개의 figure로 나누어서 다중 그래프 그리기")
+        st.write("figure()는 새로운 그래프 canvas를 생성합니다.")
+        code = '''
+data = np.arange(100, 201)
+plt.plot(data)
+
+data2 = np.arange(200, 301)
+# figure()는 새로운 그래프를 생성합니다.
+plt.figure()
+plt.plot(data2)
+
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        data = np.arange(100, 201)
+        plt.plot(data)
+        data2 = np.arange(200, 301)
+        st.pyplot(plt)
+        plt.close()
+        plt.figure()
+        plt.plot(data2)
         st.pyplot(plt)
         plt.close()
         st.divider()
-
-        st.write("2개의 figure로 나누어서 다중 그래프 그리기")
-        st.write("◾ figure()는 새로운 그래프 canvas를 생성합니다.")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
-
-            data = np.arange(100, 201)
-            plt.plot(data)
-
-            data2 = np.arange(200, 301)
-            # figure()는 새로운 그래프를 생성합니다.
-            plt.figure()
-            plt.plot(data2)
-
-            plt.show()
-        st.pyplot(plt)
-        plt.close()
 
         st.header(f"{idx.getHeadIdx()}여러개의 Plot")
         st.subheader(f"{idx.getSubIdx()}여러개의 Plot을 그리는 방법(Subplot)")
-        st.write("subplot(row, column, index)")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        st.write("subplot(row, column, index)를 사용하여 subplot을 그릴 수 있습니다.")
+        code = '''
+data = np.arange(100, 201)
+plt.subplot(2, 1, 1)
+plt.plot(data)
 
-            data = np.arange(100, 201)
-            plt.subplot(2, 1, 1)
-            plt.plot(data)
+data2 = np.arange(200, 301)
+plt.subplot(2, 1, 2)
+plt.plot(data2)
 
-            data2 = np.arange(200, 301)
-            plt.subplot(2, 1, 2)
-            plt.plot(data2)
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        data = np.arange(100, 201)
+        plt.subplot(2, 1, 1)
+        plt.plot(data)
+        data2 = np.arange(200, 301)
+        plt.subplot(2, 1, 2)
+        plt.plot(data2)
         st.pyplot(plt)
         plt.close()
-        st.divider()
 
         st.write("위의 코드와 동일하나 , (콤마)를 제거한 상태")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+data = np.arange(100, 201)
+# 콤마를 생략하고 row, column, index로 작성가능
+# 211 -> row: 2, col: 1, index: 1
+plt.subplot(211)
+plt.plot(data)
 
-            data = np.arange(100, 201)
-            # 콤마를 생략하고 row, column, index로 작성가능
-            # 211 -> row: 2, col: 1, index: 1
-            plt.subplot(211)
-            plt.plot(data)
+data2 = np.arange(200, 301)
+plt.subplot(212)
+plt.plot(data2)
 
-            data2 = np.arange(200, 301)
-            plt.subplot(212)
-            plt.plot(data2)
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        data = np.arange(100, 201)
+        plt.subplot(211)
+        plt.plot(data)
+        data2 = np.arange(200, 301)
+        plt.subplot(212)
+        plt.plot(data2)
         st.pyplot(plt)
         plt.close()
         st.divider()
 
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+data = np.arange(100, 201)
+plt.subplot(1, 3, 1)
+plt.plot(data)
 
-            data = np.arange(100, 201)
-            plt.subplot(1, 3, 1)
-            plt.plot(data)
+data2 = np.arange(200, 301)
+plt.subplot(1, 3, 2)
+plt.plot(data2)
 
-            data2 = np.arange(200, 301)
-            plt.subplot(1, 3, 2)
-            plt.plot(data2)
+data3 = np.arange(300, 401)
+plt.subplot(1, 3, 3)
+plt.plot(data3)
 
-            data3 = np.arange(300, 401)
-            plt.subplot(1, 3, 3)
-            plt.plot(data3)
-
-            plt.show()
+plt.show()
+'''
+        st.code(code, language='python', line_numbers=True)
+        data = np.arange(100, 201)
+        plt.subplot(1, 3, 1)
+        plt.plot(data)
+        data2 = np.arange(200, 301)
+        plt.subplot(1, 3, 2)
+        plt.plot(data2)
+        data3 = np.arange(300, 401)
+        plt.subplot(1, 3, 3)
+        plt.plot(data3)
         st.pyplot(plt)
         plt.close()
-        st.divider()
 
         st.subheader(f"{idx.getSubIdx()}여러개의 plot을 그리는 방법(subplots)")
         st.write("**s가 더 붙습니다.**")
         st.write("plt.subplots(행의 갯수, 열의 갯수)")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+data = np.arange(1, 51)
+# data 생성
 
-            data = np.arange(1, 51)
-            # data 생성
+# 밑 그림
+fig, axes = plt.subplots(2, 3)
 
-            # 밑 그림
-            fig, axes = plt.subplots(2, 3)
+axes[0, 0].plot(data)
+axes[0, 1].plot(data * data)
+axes[0, 2].plot(data ** 3)
+axes[1, 0].plot(data % 10)
+axes[1, 1].plot(-data)
+axes[1, 2].plot(data // 20)
 
-            axes[0, 0].plot(data)
-            axes[0, 1].plot(data * data)
-            axes[0, 2].plot(data ** 3)
-            axes[1, 0].plot(data % 10)
-            axes[1, 1].plot(-data)
-            axes[1, 2].plot(data // 20)
-
-            plt.tight_layout()
-            plt.show()
+plt.tight_layout()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        data = np.arange(1, 51)
+        fig, axes = plt.subplots(2, 3)
+        axes[0, 0].plot(data)
+        axes[0, 1].plot(data * data)
+        axes[0, 2].plot(data ** 3)
+        axes[1, 0].plot(data % 10)
+        axes[1, 1].plot(-data)
+        axes[1, 2].plot(data // 20)
+        plt.tight_layout()
         st.pyplot(plt)
         plt.close()
 
     elif path == ("Matplotlib 기초", "그래프에 text"):
+        import matplotlib.pyplot as plt
+        import numpy as np
         st.header(f"{idx.getHeadIdx()}Title")
         st.write("**matplotlib.pyplot** 모듈의 **title()** 함수를 이용해서 그래프의 타이틀 (Title)을 설정할 수 있습니다.")
         st.write("그래프의 타이틀을 표시하고 위치를 조절하는 방법, 그리고 타이틀의 폰트와 스타일을 설정하는 방법에 대해 알아봅니다.")
         
         st.subheader(f"{idx.getSubIdx()}기본 사용")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+import matplotlib.pyplot as plt
+import numpy as np
 
-            x = np.arange(0, 2, 0.2)
+x = np.arange(0, 2, 0.2)
 
-            plt.plot(x, x, 'bo')
-            plt.plot(x, x**2, color='#e35f62', marker='*', linewidth=2)
-            plt.plot(x, x**3, color='forestgreen', marker='^', markersize=9)
+plt.plot(x, x, 'bo')
+plt.plot(x, x**2, color='#e35f62', marker='*', linewidth=2)
+plt.plot(x, x**3, color='forestgreen', marker='^', markersize=9)
 
-            plt.tick_params(axis='both', direction='in', length=3, pad=6, labelsize=14)
-            plt.title('Graph Title')
+plt.tick_params(axis='both', direction='in', length=3, pad=6, labelsize=14)
+plt.title('Graph Title')
 
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        x = np.arange(0, 2, 0.2)
+        plt.plot(x, x, 'bo')
+        plt.plot(x, x**2, color='#e35f62', marker='*', linewidth=2)
+        plt.plot(x, x**3, color='forestgreen', marker='^', markersize=9)
+        plt.tick_params(axis='both', direction='in', length=3, pad=6, labelsize=14)
+        plt.title('Graph Title')
         st.write("**title()** 함수를 이용해서 그래프의 타이틀을 ‘Graph Title’로 설정했습니다.")
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}위치와 오프셋 지정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+x = np.arange(0, 2, 0.2)
 
-            x = np.arange(0, 2, 0.2)
+plt.plot(x, x, 'bo')
+plt.plot(x, x**2, color='#e35f62', marker='*', linewidth=2)
+plt.plot(x, x**3, color='forestgreen', marker='^', markersize=9)
 
-            plt.plot(x, x, 'bo')
-            plt.plot(x, x**2, color='#e35f62', marker='*', linewidth=2)
-            plt.plot(x, x**3, color='forestgreen', marker='^', markersize=9)
+plt.tick_params(axis='both', direction='in', length=3, pad=6, labelsize=14)
+plt.title('Graph Title', loc='right', pad=20)
 
-            plt.tick_params(axis='both', direction='in', length=3, pad=6, labelsize=14)
-            plt.title('Graph Title', loc='right', pad=20)
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        x = np.arange(0, 2, 0.2)
+        plt.plot(x, x, 'bo')
+        plt.plot(x, x**2, color='#e35f62', marker='*', linewidth=2)
+        plt.plot(x, x**3, color='forestgreen', marker='^', markersize=9)
+        plt.tick_params(axis='both', direction='in', length=3, pad=6, labelsize=14)
+        plt.title('Graph Title', loc='right', pad=20)
         st.write("**plt.title()** 함수의 **loc** 파라미터를 **‘right’** 로 설정하면, 타이틀이 그래프의 오른쪽 위에 나타나게 됩니다.")
         st.write("{‘left’, ‘center’, ‘right’} 중 선택할 수 있으며 디폴트는 **‘center’** 입니다.")
         st.write("**pad** 파라미터는 **타이틀과 그래프와의 간격을** 포인트 단위로 설정합니다.")
@@ -3055,26 +3262,37 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}폰트 지정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+x = np.arange(0, 2, 0.2)
 
-            x = np.arange(0, 2, 0.2)
+plt.plot(x, x, 'bo')
+plt.plot(x, x**2, color='#e35f62', marker='*', linewidth=2)
+plt.plot(x, x**3, color='forestgreen', marker='^', markersize=9)
 
-            plt.plot(x, x, 'bo')
-            plt.plot(x, x**2, color='#e35f62', marker='*', linewidth=2)
-            plt.plot(x, x**3, color='forestgreen', marker='^', markersize=9)
+plt.tick_params(axis='both', direction='in', length=3, pad=6, labelsize=14)
+plt.title('Graph Title', loc='right', pad=20)
 
-            plt.tick_params(axis='both', direction='in', length=3, pad=6, labelsize=14)
-            plt.title('Graph Title', loc='right', pad=20)
+title_font = {
+    'fontsize': 16,
+    'fontweight': 'bold'
+}
+plt.title('Graph Title', fontdict=title_font, loc='left', pad=20)
 
-            title_font = {
-                'fontsize': 16,
-                'fontweight': 'bold'
-            }
-            plt.title('Graph Title', fontdict=title_font, loc='left', pad=20)
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        x = np.arange(0, 2, 0.2)
+        plt.plot(x, x, 'bo')
+        plt.plot(x, x**2, color='#e35f62', marker='*', linewidth=2)
+        plt.plot(x, x**3, color='forestgreen', marker='^', markersize=9)
 
-            plt.show()
+        plt.tick_params(axis='both', direction='in', length=3, pad=6, labelsize=14)
+        plt.title('Graph Title', loc='right', pad=20)
+
+        title_font = {
+            'fontsize': 16,
+            'fontweight': 'bold'
+        }
+        plt.title('Graph Title', fontdict=title_font, loc='left', pad=20)
         st.write("**fontdict** 파라미터에 딕셔너리 형태로 폰트 스타일을 설정할 수 있습니다.")
         st.write("**‘fontsize’** 를 16으로, **‘fontweight’** 를 ‘bold’로 설정했습니다.")
         st.write("**‘fontsize’** 는 포인트 단위의 숫자를 입력하거나 ‘smaller’, ‘x-large’ 등의 상대적인 설정을 할 수 있습니다.")
@@ -3084,41 +3302,56 @@ start는 시작 인덱스, end는 끝 인덱스, step은 슬라이싱 간격을 
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}타이틀 얻기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+x = np.arange(0, 2, 0.2)
 
-            x = np.arange(0, 2, 0.2)
+plt.plot(x, x, 'bo')
+plt.plot(x, x**2, color='#e35f62', marker='*', linewidth=2)
+plt.plot(x, x**3, color='forestgreen', marker='^', markersize=9)
 
-            plt.plot(x, x, 'bo')
-            plt.plot(x, x**2, color='#e35f62', marker='*', linewidth=2)
-            plt.plot(x, x**3, color='forestgreen', marker='^', markersize=9)
+plt.tick_params(axis='both', direction='in', length=3, pad=6, labelsize=14)
+title_right = plt.title('Graph Title', loc='right', pad=20)
 
-            plt.tick_params(axis='both', direction='in', length=3, pad=6, labelsize=14)
-            title_right = plt.title('Graph Title', loc='right', pad=20)
+title_font = {
+    'fontsize': 16,
+    'fontweight': 'bold'
+}
+title_left = plt.title('Graph Title', fontdict=title_font, loc='left', pad=20)
 
-            title_font = {
-                'fontsize': 16,
-                'fontweight': 'bold'
-            }
-            title_left = plt.title('Graph Title', fontdict=title_font, loc='left', pad=20)
+print(title_left.get_position())
+print(title_left.get_text())
 
-            print(title_left.get_position())
-            print(title_left.get_text())
+print(title_right.get_position())
+print(title_right.get_text())
 
-            print(title_right.get_position())
-            print(title_right.get_text())
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        x = np.arange(0, 2, 0.2)
+        plt.plot(x, x, 'bo')
+        plt.plot(x, x**2, color='#e35f62', marker='*', linewidth=2)
+        plt.plot(x, x**3, color='forestgreen', marker='^', markersize=9)
+        plt.tick_params(axis='both', direction='in', length=3, pad=6, labelsize=14)
+        title_right = plt.title('Graph Title', loc='right', pad=20)
+        title_font = {
+            'fontsize': 16,
+            'fontweight': 'bold'
+        }
+        title_left = plt.title('Graph Title', fontdict=title_font, loc='left', pad=20)
+        print(title_left.get_position())
+        print(title_left.get_text())
+        print(title_right.get_position())
+        print(title_right.get_text())
         st.write("**plt.title()** 함수는 타이틀을 나타내는 Matplotlib **text** 객체를 반환합니다.")
         st.pyplot(plt)
         plt.close()
+
         st.write("**get_position()** 과 **get_text()** 메서드를 사용해서 텍스트 위치와 문자열을 얻을 수 있습니다.")
         code = '''(0.0, 1.0)
 Graph Title
 (1.0, 1.0)
 Graph Title'''
         st.code(code, language="python")
+        st.divider()
 
         st.header(f"{idx.getHeadIdx()}Text 삽입")
         st.write("matplotlib.pyplot 모듈의 **text()** 함수는 그래프의 적절한 위치에 텍스트를 삽입하도록 합니다.")
@@ -3126,21 +3359,28 @@ Graph Title'''
         st.write("이 페이지에서 사용하는 히스토그램 예제는 :blue[Histogram] 페이지를 참고하세요.")
 
         st.subheader(f"{idx.getSubIdx()}기본 사용")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+a = 2.0 * np.random.randn(10000) + 1.0
+b = np.random.standard_normal(10000)
+c = 20.0 * np.random.rand(5000) - 10.0
 
-            a = 2.0 * np.random.randn(10000) + 1.0
-            b = np.random.standard_normal(10000)
-            c = 20.0 * np.random.rand(5000) - 10.0
-
-            plt.hist(a, bins=100, density=True, alpha=0.7, histtype='step')
-            plt.text(1.0, 0.35, '2.0*np.random.randn(10000)+1.0')
-            plt.hist(b, bins=50, density=True, alpha=0.5, histtype='stepfilled')
-            plt.text(2.0, 0.20, 'np.random.standard_normal(10000)')
-            plt.hist(c, bins=100, density=True, alpha=0.9, histtype='step')
-            plt.text(5.0, 0.08, 'np.random.rand(5000)-10.0')
-            plt.show()
+plt.hist(a, bins=100, density=True, alpha=0.7, histtype='step')
+plt.text(1.0, 0.35, '2.0*np.random.randn(10000)+1.0')
+plt.hist(b, bins=50, density=True, alpha=0.5, histtype='stepfilled')
+plt.text(2.0, 0.20, 'np.random.standard_normal(10000)')
+plt.hist(c, bins=100, density=True, alpha=0.9, histtype='step')
+plt.text(5.0, 0.08, 'np.random.rand(5000)-10.0')
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        a = 2.0 * np.random.randn(10000) + 1.0
+        b = np.random.standard_normal(10000)
+        c = 20.0 * np.random.rand(5000) - 10.0
+        plt.hist(a, bins=100, density=True, alpha=0.7, histtype='step')
+        plt.text(1.0, 0.35, '2.0*np.random.randn(10000)+1.0')
+        plt.hist(b, bins=50, density=True, alpha=0.5, histtype='stepfilled')
+        plt.text(2.0, 0.20, 'np.random.standard_normal(10000)')
+        plt.hist(c, bins=100, density=True, alpha=0.9, histtype='step')
+        plt.text(5.0, 0.08, 'np.random.rand(5000)-10.0')
         st.write("**text()** 함수를 이용해서 3개의 히스토그램 그래프에 설명을 위한 텍스트를 각각 추가했습니다.")
         st.write("**text()** 에 그래프 상의 x 위치, y 위치, 그리고 삽입할 텍스트를 순서대로 입력합니다.")
         st.pyplot(plt)
@@ -3148,38 +3388,58 @@ Graph Title'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}텍스트 스타일 설정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+a = 2.0 * np.random.randn(10000) + 1.0
+b = np.random.standard_normal(10000)
+c = 20.0 * np.random.rand(5000) - 10.0
 
-            a = 2.0 * np.random.randn(10000) + 1.0
-            b = np.random.standard_normal(10000)
-            c = 20.0 * np.random.rand(5000) - 10.0
+font1 = {'family': 'serif',
+    'color':  'darkred',
+    'weight': 'normal',
+    'size': 16}
 
-            font1 = {'family': 'serif',
-                'color':  'darkred',
-                'weight': 'normal',
-                'size': 16}
+font2 = {'family': 'Times New Roman',
+    'color':  'blue',
+    'weight': 'bold',
+    'size': 12,
+    'alpha': 0.7}
 
-            font2 = {'family': 'Times New Roman',
-                'color':  'blue',
-                'weight': 'bold',
-                'size': 12,
-                'alpha': 0.7}
+font3 = {'family': 'Arial',
+    'color':  'forestgreen',
+    'style': 'italic',
+    'size': 14}
 
-            font3 = {'family': 'Arial',
-                'color':  'forestgreen',
-                'style': 'italic',
-                'size': 14}
+plt.hist(a, bins=100, density=True, alpha=0.7, histtype='step')
+plt.text(1.0, 0.35, 'np.random.randn()', fontdict=font1)
+plt.hist(b, bins=50, density=True, alpha=0.5, histtype='stepfilled')
+plt.text(2.0, 0.20, 'np.random.standard_normal()', fontdict=font2)
+plt.hist(c, bins=100, density=True, alpha=0.9, histtype='step')
+plt.text(5.0, 0.08, 'np.random.rand()', fontdict=font3)
 
-            plt.hist(a, bins=100, density=True, alpha=0.7, histtype='step')
-            plt.text(1.0, 0.35, 'np.random.randn()', fontdict=font1)
-            plt.hist(b, bins=50, density=True, alpha=0.5, histtype='stepfilled')
-            plt.text(2.0, 0.20, 'np.random.standard_normal()', fontdict=font2)
-            plt.hist(c, bins=100, density=True, alpha=0.9, histtype='step')
-            plt.text(5.0, 0.08, 'np.random.rand()', fontdict=font3)
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        a = 2.0 * np.random.randn(10000) + 1.0
+        b = np.random.standard_normal(10000)
+        c = 20.0 * np.random.rand(5000) - 10.0
+        font1 = {'family': 'serif',
+            'color':  'darkred',
+            'weight': 'normal',
+            'size': 16}
+        font2 = {'family': 'Times New Roman',
+            'color':  'blue',
+            'weight': 'bold',
+            'size': 12,
+            'alpha': 0.7}
+        font3 = {'family': 'Arial',
+            'color':  'forestgreen',
+            'style': 'italic',
+            'size': 14}
+        plt.hist(a, bins=100, density=True, alpha=0.7, histtype='step')
+        plt.text(1.0, 0.35, 'np.random.randn()', fontdict=font1)
+        plt.hist(b, bins=50, density=True, alpha=0.5, histtype='stepfilled')
+        plt.text(2.0, 0.20, 'np.random.standard_normal()', fontdict=font2)
+        plt.hist(c, bins=100, density=True, alpha=0.9, histtype='step')
+        plt.text(5.0, 0.08, 'np.random.rand()', fontdict=font3)
         st.write("**fontdict** 키워드를 이용하면 font의 종류, 크기, 색상, 투명도, weight 등의 텍스트 스타일을 설정할 수 있습니다.")
         st.write("font1, font2, font3과 같이 미리 지정한 폰트 딕셔너리를 fontdict 키워드에 입력해줍니다.")
         st.write("예제에서는 ‘family’, ‘color’, ‘weight’, ‘size’, ‘alpha’, ‘style’ 등과 같은 텍스트 속성을 사용했습니다.")
@@ -3188,44 +3448,59 @@ Graph Title'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}텍스트 회전하기")
-        with st.echo():
-            plt.hist(a, bins=100, density=True, alpha=0.7, histtype='step')
-            plt.text(-3.0, 0.15, 'np.random.randn()', fontdict=font1, rotation=85)
-            plt.hist(b, bins=50, density=True, alpha=0.5, histtype='stepfilled')
-            plt.text(2.0, 0.0, 'np.random.standard_normal()', fontdict=font2, rotation=-60)
-            plt.hist(c, bins=100, density=True, alpha=0.9, histtype='step')
-            plt.text(-10.0, 0.08, 'np.random.rand()', fontdict=font3)
-            plt.show()
+        code = '''
+plt.hist(a, bins=100, density=True, alpha=0.7, histtype='step')
+plt.text(-3.0, 0.15, 'np.random.randn()', fontdict=font1, rotation=85)
+plt.hist(b, bins=50, density=True, alpha=0.5, histtype='stepfilled')
+plt.text(2.0, 0.0, 'np.random.standard_normal()', fontdict=font2, rotation=-60)
+plt.hist(c, bins=100, density=True, alpha=0.9, histtype='step')
+plt.text(-10.0, 0.08, 'np.random.rand()', fontdict=font3)
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.hist(a, bins=100, density=True, alpha=0.7, histtype='step')
+        plt.text(-3.0, 0.15, 'np.random.randn()', fontdict=font1, rotation=85)
+        plt.hist(b, bins=50, density=True, alpha=0.5, histtype='stepfilled')
+        plt.text(2.0, 0.0, 'np.random.standard_normal()', fontdict=font2, rotation=-60)
+        plt.hist(c, bins=100, density=True, alpha=0.9, histtype='step')
+        plt.text(-10.0, 0.08, 'np.random.rand()', fontdict=font3)
         st.write("rotation 키워드를 이용해서 텍스트를 회전할 수 있습니다.")
         st.pyplot(plt)
         plt.close()
     
-    elif path == ("Matplotlib 기초", "그래프"):
+    elif path == ("Matplotlib 기초", "그래프 세부 속성"):
+        import matplotlib.pyplot as plt
+        import numpy as np
         st.header(f"{idx.getHeadIdx()}축 레이블(Label) 설정하기")
         st.write("**matplotlib.pyplot** 모듈의 **xlabel(), ylabel()** 함수를 사용하면 그래프의 x, y 축에 대한 레이블을 표시할 수 있습니다.")
         st.write("xlabel(), ylabel() 함수를 사용해서 그래프의 축에 레이블을 표시하는 방법에 대해 소개합니다.")
 
         st.subheader(f"{idx.getSubIdx()}기본 사용")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+import matplotlib.pyplot as plt
 
-            plt.plot([1, 2, 3, 4], [1, 4, 9, 16])
-            plt.xlabel('X-Label')
-            plt.ylabel('Y-Label')
-            plt.show()
+plt.plot([1, 2, 3, 4], [1, 4, 9, 16])
+plt.xlabel('X-Label')
+plt.ylabel('Y-Label')
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3, 4], [1, 4, 9, 16])
+        plt.xlabel('X-Label')
+        plt.ylabel('Y-Label')
         st.write("**xlabel(), ylabel()** 함수에 문자열을 입력하면, 아래 그림과 같이 각각의 축에 레이블이 표시됩니다.")
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}여백 지정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-
-            plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
-            plt.xlabel('X-Axis', labelpad=15)
-            plt.ylabel('Y-Axis', labelpad=20)
-            plt.show()
+        code = '''
+plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
+plt.xlabel('X-Axis', labelpad=15)
+plt.ylabel('Y-Axis', labelpad=20)
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
+        plt.xlabel('X-Axis', labelpad=15)
+        plt.ylabel('Y-Axis', labelpad=20)
         st.write("**xlabel(), ylabel()** 함수의 **labelpad** 파라미터는 축 레이블의 **여백 (Padding)** 을 지정합니다.")
         st.write("예제에서는 X축 레이블에 대해서 15pt, Y축 레이블에 대해서 20pt 만큼의 여백을 지정했습니다.")
         st.pyplot(plt)
@@ -3233,90 +3508,149 @@ Graph Title'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}폰트 설정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-
-            plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
-            plt.xlabel('X-Axis', labelpad=15, fontdict={'family': 'serif', 'color': 'b', 'weight': 'bold', 'size': 14})
-            plt.ylabel('Y-Axis', labelpad=20, fontdict={'family': 'fantasy', 'color': 'deeppink', 'weight': 'normal', 'size': 'xx-large'})
-            plt.show()
+        code = '''
+plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
+plt.xlabel('X-Axis', labelpad=15, fontdict={'family': 'serif', 'color': 'b', 'weight': 'bold', 'size': 14})
+plt.ylabel('Y-Axis', labelpad=20, fontdict={'family': 'fantasy', 'color': 'deeppink', 'weight': 'normal', 'size': 'xx-large'})
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
+        plt.xlabel('X-Axis', labelpad=15, fontdict={'family': 'serif', 'color': 'b', 'weight': 'bold', 'size': 14})
+        plt.ylabel('Y-Axis', labelpad=20, fontdict={'family': 'fantasy', 'color': 'deeppink', 'weight': 'normal', 'size': 'xx-large'})
         st.write("**xlabel(), ylabel()** 함수의 **fontdict** 파라미터를 사용하면 축 레이블의 폰트 스타일을 설정할 수 있습니다.")
         st.write("예제에서는 ‘family’, ‘color’, ‘weight’, ‘size’와 같은 속성을 사용해서 축 레이블 텍스트를 설정했습니다.")
         st.write("아래와 같이 작성하면 폰트 스타일을 편리하게 재사용할 수 있습니다.")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+import matplotlib.pyplot as plt
 
-            font1 = {'family': 'serif',
-                    'color': 'b',
-                    'weight': 'bold',
-                    'size': 14
-                    }
+font1 = {'family': 'serif',
+        'color': 'b',
+        'weight': 'bold',
+        'size': 14
+        }
 
-            font2 = {'family': 'fantasy',
-                    'color': 'deeppink',
-                    'weight': 'normal',
-                    'size': 'xx-large'
-                    }
+font2 = {'family': 'fantasy',
+        'color': 'deeppink',
+        'weight': 'normal',
+        'size': 'xx-large'
+        }
 
-            plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
-            plt.xlabel('X-Axis', labelpad=15, fontdict=font1)
-            plt.ylabel('Y-Axis', labelpad=20, fontdict=font2)
-            plt.show()
+plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
+plt.xlabel('X-Axis', labelpad=15, fontdict=font1)
+plt.ylabel('Y-Axis', labelpad=20, fontdict=font2)
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        font1 = {'family': 'serif',
+                'color': 'b',
+                'weight': 'bold',
+                'size': 14
+                }
+        font2 = {'family': 'fantasy',
+                'color': 'deeppink',
+                'weight': 'normal',
+                'size': 'xx-large'
+                }
+        plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
+        plt.xlabel('X-Axis', labelpad=15, fontdict=font1)
+        plt.ylabel('Y-Axis', labelpad=20, fontdict=font2)
         st.pyplot(plt)
         plt.close()
         st.divider()
 
-        st.subheader(f"{idx.getSubIdx()}위치 저장하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        st.subheader(f"{idx.getSubIdx()}한글 폰트 깨짐 해결하기")
+        st.write("matplotlib에서는 한글 폰트를 지원하지 않기 때문에, 그래프에 한글을 작성하게 되면 한글이 깨지는 문제가 발생합니다.")
+        st.write("이를 해결하기 위해서는 한글 폰트를 설정해줘야 합니다.")
+        st.write("1️⃣ **첫 번째 방법**")
+        st.write("지원하는 폰트를 찾아 설정해주기")
+        st.write("이 중에서 matplotlib에서 지원하는 폰트를 찾아 설정해주면 됩니다.")
+        st.write("윈도우에서는 'malgun.ttf' 혹은 'NanumBarunGothic.ttf' 등을 사용할 수 있습니다. 맥에서는 'AppleGothic.ttf' 등을 사용할 수 있습니다.")
+        code = '''
+import matplotlib.pyplot as plt
+plt.rcParams['font.family'] ='Malgun Gothic'
+plt.rcParams['axes.unicode_minus'] =False'''
+        st.code(code, language='python', line_numbers=True)
+        st.write("2️⃣ **두 번째 방법**")
+        st.write("사용중인 os에서 한글 폰트 찾아 설정해주기")
+        st.write("보통 첫번째 방법으로 하면 대부분 작동하는데, 새로 다운받거나 지원하지 않는 다른 폰트를 사용하고 싶다면 경로를 따로 지정해줘야 합니다.")
+        st.write('윈도우에서는 "C:\Windows\Fonts" 폴더에, 맥에서는 "/Library/Fonts" 폴더에 폰트 파일이 저장되어 있습니다.')
+        st.write("다음 코드는 윈도우 기준 입니다.")
+        code = '''
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 
-            plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
-            plt.xlabel('X-Axis', loc='right')
-            plt.ylabel('Y-Axis', loc='top')
-            plt.show()
+# 나눔글꼴 경로 설정
+font_path = 'C:/Windows/Fonts/NanumGothic.ttf'
+
+# 폰트 이름 가져오기
+font_name = fm.FontProperties(fname=font_path).get_name()
+
+# 폰트 설정
+plt.rc('font', family=font_name)'''
+        st.code(code, language='python', line_numbers=True)
+        st.divider()
+
+        st.subheader(f"{idx.getSubIdx()}위치 저장하기")
+        code = '''
+plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
+plt.xlabel('X-Axis', loc='right')
+plt.ylabel('Y-Axis', loc='top')
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
+        plt.xlabel('X-Axis', loc='right')
+        plt.ylabel('Y-Axis', loc='top')
         st.write("**xlabel()** 함수의 **loc** 파라미터는 X축 레이블의 위치를 지정합니다. ({‘left’, ‘center’, ‘right’})")
         st.write("**ylabel()** 함수의 **loc** 파라미터는 Y축 레이블의 위치를 지정합니다. ({‘bottom’, ‘center’, ‘top’})")
         st.write("이 파라미터는 **Matplotlib 3.3** 이후 버전부터 적용되었습니다.")
         st.pyplot(plt)
         plt.close()
+        
+        code = '''
+plt.plot([1, 2, 3], [3, 6, 9])
+plt.plot([1, 2, 3], [2, 4, 9])
+# 타이틀 & font 설정
+plt.title("이것은 타이틀 입니다")
 
-        with st.echo():
-            import matplotlib.pyplot as plt
-
-            plt.plot([1, 2, 3], [3, 6, 9])
-            plt.plot([1, 2, 3], [2, 4, 9])
-            # 타이틀 & font 설정
-            plt.title("이것은 타이틀 입니다")
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3], [3, 6, 9])
+        plt.plot([1, 2, 3], [2, 4, 9])
+        plt.title("이것은 타이틀 입니다", fontproperties=prop)
         st.pyplot(plt)
         plt.close()
         st.divider()
         
         st.subheader(f"{idx.getSubIdx()}X, Y 축 Tick 설정(rotation)")
         st.write("Tick은 X, Y축에 위치한 눈금을 말합니다.")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+plt.plot(np.arange(10), np.arange(10)*2)
+plt.plot(np.arange(10), np.arange(10)**2)
+plt.plot(np.arange(10), np.log(np.arange(10)))
 
-            plt.plot(np.arange(10), np.arange(10)*2)
-            plt.plot(np.arange(10), np.arange(10)**2)
-            plt.plot(np.arange(10), np.log(np.arange(10)))
+# 타이틀 & font 설정
+plt.title('X, Y 틱을 조정합니다', fontsize=10, fontproperties=prop)
 
-            # 타이틀 & font 설정
-            plt.title('X, Y 틱을 조정합니다', fontsize=10)
+# X축 & Y축 Label 설정
+plt.xlabel('X축', fontsize=10, fontproperties=prop)
+plt.ylabel('Y축', fontsize=10, fontproperties=prop)
 
-            # X축 & Y축 Label 설정
-            plt.xlabel('X축', fontsize=10)
-            plt.ylabel('Y축', fontsize=10)
+# X tick, Y tick 설정
+plt.xticks(rotation=90)
+plt.yticks(rotation=30)
 
-            # X tick, Y tick 설정
-            plt.xticks(rotation=90)
-            plt.yticks(rotation=30)
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot(np.arange(10), np.arange(10)*2)
+        plt.plot(np.arange(10), np.arange(10)**2)
+        plt.plot(np.arange(10), np.log(np.arange(10)))
+        plt.title('X, Y 틱을 조정합니다', fontsize=10, fontproperties=prop)
+        plt.xlabel('X축', fontsize=10, fontproperties=prop)
+        plt.ylabel('Y축', fontsize=10, fontproperties=prop)
+        plt.xticks(rotation=90)
+        plt.yticks(rotation=30)
         st.pyplot(plt)
         plt.close()
+        st.divider()
 
         st.header(f"{idx.getHeadIdx()}범례(Legend) 설정")
         st.write("**범례 (Legend)** 는 그래프에 데이터의 종류를 표시하기 위한 텍스트입니다.")
@@ -3324,15 +3658,18 @@ Graph Title'''
         st.write("그래프에 다양한 방식으로 범례를 표시하는 방법에 대해 소개합니다.")
 
         st.subheader(f"{idx.getSubIdx()}기본 사용")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+plt.plot([1, 2, 3, 4], [2, 3, 5, 10], label='Price ($)')
+plt.xlabel('X-Axis')
+plt.ylabel('Y-Axis')
+plt.legend()
 
-            plt.plot([1, 2, 3, 4], [2, 3, 5, 10], label='Price ($)')
-            plt.xlabel('X-Axis')
-            plt.ylabel('Y-Axis')
-            plt.legend()
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3, 4], [2, 3, 5, 10], label='Price ($)')
+        plt.xlabel('X-Axis')
+        plt.ylabel('Y-Axis')
+        plt.legend()
         st.write("그래프 영역에 범례를 나타내기 위해서는 우선 **plot()** 함수에 **label** 문자열을 지정하고, **matplotlib.pyplot** 모듈의 **legend()** 함수를 호출합니다.")
         st.write("아래와 같이 그래프의 적절한 위치에 데이터를 설명하는 범례가 나타납니다.")
         st.pyplot(plt)
@@ -3340,35 +3677,40 @@ Graph Title'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}위치 지정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+plt.plot([1, 2, 3, 4], [2, 3, 5, 10], label='Price ($)')
+plt.xlabel('X-Axis')
+plt.ylabel('Y-Axis')
+# plt.legend(loc=(0.0, 0.0))
+# plt.legend(loc=(0.5, 0.5))
+plt.legend(loc=(1.0, 1.0))
 
-            plt.plot([1, 2, 3, 4], [2, 3, 5, 10], label='Price ($)')
-            plt.xlabel('X-Axis')
-            plt.ylabel('Y-Axis')
-            # plt.legend(loc=(0.0, 0.0))
-            # plt.legend(loc=(0.5, 0.5))
-            plt.legend(loc=(1.0, 1.0))
-
-            plt.show()
-            st.write("xlabel(), ylabel() 함수의 labelpad 파라미터는 축 레이블의 여백 (Padding)을 지정합니다.")
-            st.write("**legend()** 함수의 **loc** 파라미터를 이용해서 범례가 표시될 위치를 설정할 수 있습니다.")
-            st.write("**loc** 파라미터를 숫자 쌍 튜플로 지정하면, 해당하는 위치에 범례가 표시됩니다.")
-            st.write("**loc=(0.0, 0.0)**은 데이터 영역의 왼쪽 아래, **loc=(1.0, 1.0)**은 데이터 영역의 오른쪽 위 위치입니다.")
-            st.write("**loc** 파라미터에 여러 숫자 쌍을 입력하면서 범례의 위치를 확인해보세요.")
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3, 4], [2, 3, 5, 10], label='Price ($)')
+        plt.xlabel('X-Axis')
+        plt.ylabel('Y-Axis')
+        plt.legend(loc=(1.0, 1.0))
+        st.write("xlabel(), ylabel() 함수의 labelpad 파라미터는 축 레이블의 여백 (Padding)을 지정합니다.")
+        st.write("**legend()** 함수의 **loc** 파라미터를 이용해서 범례가 표시될 위치를 설정할 수 있습니다.")
+        st.write("**loc** 파라미터를 숫자 쌍 튜플로 지정하면, 해당하는 위치에 범례가 표시됩니다.")
+        st.write("**loc=(0.0, 0.0)**은 데이터 영역의 왼쪽 아래, **loc=(1.0, 1.0)**은 데이터 영역의 오른쪽 위 위치입니다.")
+        st.write("**loc** 파라미터에 여러 숫자 쌍을 입력하면서 범례의 위치를 확인해보세요.")
         st.pyplot(plt)
         plt.close()
-        st.divider()
-        
-        with st.echo():
-            import matplotlib.pyplot as plt
 
-            plt.plot([1, 2, 3, 4], [2, 3, 5, 10], label='Price ($)')
-            plt.xlabel('X-Axis')
-            plt.ylabel('Y-Axis')
-            plt.legend(loc='lower right')
+        code = '''
+plt.plot([1, 2, 3, 4], [2, 3, 5, 10], label='Price ($)')
+plt.xlabel('X-Axis')
+plt.ylabel('Y-Axis')
+plt.legend(loc='lower right')
 
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3, 4], [2, 3, 5, 10], label='Price ($)')
+        plt.xlabel('X-Axis')
+        plt.ylabel('Y-Axis')
+        plt.legend(loc='lower right')
         st.write("**loc** 파라미터는 예제에서와 같이 문자열로 지정할 수도 있고, 숫자 코드를 사용할 수도 있습니다.")
         st.write("**loc=’lower right’** 와 같이 지정하면 아래와 같이 오른쪽 아래에 범례가 표시됩니다.")
         st.pyplot(plt)
@@ -3376,17 +3718,21 @@ Graph Title'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}열 개수 지정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+plt.plot([1, 2, 3, 4], [2, 3, 5, 10], label='Price ($)')
+plt.plot([1, 2, 3, 4], [3, 5, 9, 7], label='Demand (#)')
+plt.xlabel('X-Axis')
+plt.ylabel('Y-Axis')
+# plt.legend(loc='best')          # ncol = 1
+plt.legend(loc='best', ncol=2)    # ncol = 2
 
-            plt.plot([1, 2, 3, 4], [2, 3, 5, 10], label='Price ($)')
-            plt.plot([1, 2, 3, 4], [3, 5, 9, 7], label='Demand (#)')
-            plt.xlabel('X-Axis')
-            plt.ylabel('Y-Axis')
-            # plt.legend(loc='best')          # ncol = 1
-            plt.legend(loc='best', ncol=2)    # ncol = 2
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3, 4], [2, 3, 5, 10], label='Price ($)')
+        plt.plot([1, 2, 3, 4], [3, 5, 9, 7], label='Demand (#)')
+        plt.xlabel('X-Axis')
+        plt.ylabel('Y-Axis')
+        plt.legend(loc='best', ncol=2)
         st.write("**legend()** 함수의 **ncol** 파라미터는 범례에 표시될 텍스트의 열의 개수를 지정합니다.")
         st.write("기본적으로 아래 첫번째 그림과 같이 범례 텍스트는 1개의 열로 표시되며, **ncol=2** 로 지정하면 아래 두번째 그림과 같이 표시됩니다.")
         st.pyplot(plt)
@@ -3394,17 +3740,21 @@ Graph Title'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}폰트 크기 지정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+plt.plot([1, 2, 3, 4], [2, 3, 5, 10], label='Price ($)')
+plt.plot([1, 2, 3, 4], [3, 5, 9, 7], label='Demand (#)')
+plt.xlabel('X-Axis')
+plt.ylabel('Y-Axis')
+# plt.legend(loc='best')
+plt.legend(loc='best', ncol=2, fontsize=14)
 
-            plt.plot([1, 2, 3, 4], [2, 3, 5, 10], label='Price ($)')
-            plt.plot([1, 2, 3, 4], [3, 5, 9, 7], label='Demand (#)')
-            plt.xlabel('X-Axis')
-            plt.ylabel('Y-Axis')
-            # plt.legend(loc='best')
-            plt.legend(loc='best', ncol=2, fontsize=14)
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3, 4], [2, 3, 5, 10], label='Price ($)')
+        plt.plot([1, 2, 3, 4], [3, 5, 9, 7], label='Demand (#)')
+        plt.xlabel('X-Axis')
+        plt.ylabel('Y-Axis')
+        plt.legend(loc='best', ncol=2, fontsize=14)
         st.write("**legend()** 함수의 **fontsize** 파라미터는 범례에 표시될 폰트의 크기를 지정합니다.")
         st.write("폰트 크기를 14로 지정했습니다.")
         st.pyplot(plt)
@@ -3412,42 +3762,51 @@ Graph Title'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}범례 테두리 꾸미기")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+plt.plot([1, 2, 3, 4], [2, 3, 5, 10], label='Price ($)')
+plt.plot([1, 2, 3, 4], [3, 5, 9, 7], label='Demand (#)')
+plt.xlabel('X-Axis')
+plt.ylabel('Y-Axis')
+# plt.legend(loc='best')
+plt.legend(loc='best', ncol=2, fontsize=14, frameon=True, shadow=True)
 
-            plt.plot([1, 2, 3, 4], [2, 3, 5, 10], label='Price ($)')
-            plt.plot([1, 2, 3, 4], [3, 5, 9, 7], label='Demand (#)')
-            plt.xlabel('X-Axis')
-            plt.ylabel('Y-Axis')
-            # plt.legend(loc='best')
-            plt.legend(loc='best', ncol=2, fontsize=14, frameon=True, shadow=True)
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3, 4], [2, 3, 5, 10], label='Price ($)')
+        plt.plot([1, 2, 3, 4], [3, 5, 9, 7], label='Demand (#)')
+        plt.xlabel('X-Axis')
+        plt.ylabel('Y-Axis')
+        plt.legend(loc='best', ncol=2, fontsize=14, frameon=True, shadow=True)
         st.write("**frameon** 파라미터는 범례 텍스트 상자의 테두리를 표시할지 여부를 지정합니다.")
         st.write("**frameon=False** 로 지정하면 테두리가 표시되지 않습니다.")
         st.write("**shadow** 파라미터를 사용해서 텍스트 상자에 그림자를 표시할 수 있습니다.")
         st.pyplot(plt)
         plt.close()
         st.write("이 외에도 legend() 함수에는 **facecolor, edgecolor, borderpad, labelspacing** 과 같은 다양한 파라미터가 있습니다.")
+        st.divider()
 
         st.header(f"{idx.getHeadIdx()}축 범위 지정하기")
         st.write("**matplotlib.pyplot** 모듈의 **xlim(), ylim(), axis()** 함수를 사용하면 그래프의 X, Y축이 표시되는 범위를 지정할 수 있습니다.")
-        st.write("◾ xlim() - X축이 표시되는 범위를 지정하거나 반환합니다.")
-        st.write("◾ ylim() - Y축이 표시되는 범위를 지정하거나 반환합니다.")
-        st.write("◾ axis() - X, Y축이 표시되는 범위를 지정하거나 반환합니다.")
+        st.write("- xlim() - X축이 표시되는 범위를 지정하거나 반환합니다.")
+        st.write("- ylim() - Y축이 표시되는 범위를 지정하거나 반환합니다.")
+        st.write("- axis() - X, Y축이 표시되는 범위를 지정하거나 반환합니다.")
         st.write("그래프의 축의 범위를 지정하고, 확인하는 방법에 대해 소개합니다.")
         
         st.subheader(f"{idx.getSubIdx()}기본 사용 - xlim(), ylim()")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
+plt.xlabel('X-Axis')
+plt.ylabel('Y-Axis')
+plt.xlim([0, 5])      # X축의 범위: [xmin, xmax]
+plt.ylim([0, 20])     # Y축의 범위: [ymin, ymax]
 
-            plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
-            plt.xlabel('X-Axis')
-            plt.ylabel('Y-Axis')
-            plt.xlim([0, 5])      # X축의 범위: [xmin, xmax]
-            plt.ylim([0, 20])     # Y축의 범위: [ymin, ymax]
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
+        plt.xlabel('X-Axis')
+        plt.ylabel('Y-Axis')
+        plt.xlim([0, 5])
+        plt.ylim([0, 20])
         st.write("**xlim()** 함수에 xmin, xmax 값을 각각 입력하거나 리스트 또는 튜플의 형태로 입력합니다.")
         st.write("**ylim()** 함수에 ymin, ymax 값을 각각 입력하거나 리스트 또는 튜플의 형태로 입력합니다.")
         st.write("입력값이 없으면 데이터에 맞게 자동으로 범위를 지정합니다.")
@@ -3456,15 +3815,18 @@ Graph Title'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}기본사용 - axis()")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
+plt.xlabel('X-Axis')
+plt.ylabel('Y-Axis')
+plt.axis([0, 5, 0, 20])  # X, Y축의 범위: [xmin, xmax, ymin, ymax]
 
-            plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
-            plt.xlabel('X-Axis')
-            plt.ylabel('Y-Axis')
-            plt.axis([0, 5, 0, 20])  # X, Y축의 범위: [xmin, xmax, ymin, ymax]
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
+        plt.xlabel('X-Axis')
+        plt.ylabel('Y-Axis')
+        plt.axis([0, 5, 0, 20])
         st.write("**axis()** 함수에 [xmin, xmax, ymin, ymax]의 형태로 X, Y축의 범위를 지정할 수 있습니다.")
         st.write("**axis()** 함수에 입력한 리스트 (또는 튜플)는 반드시 네 개의 값 (xmin, xmax, ymin, ymax)이 있어야 합니다.")
         st.write("입력값이 없으면 데이터에 맞게 자동으로 범위를 지정합니다.")
@@ -3473,16 +3835,19 @@ Graph Title'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}옵션 지정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
+plt.xlabel('X-Axis')
+plt.ylabel('Y-Axis')
+plt.axis('square')
+# plt.axis('scaled')
 
-            plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
-            plt.xlabel('X-Axis')
-            plt.ylabel('Y-Axis')
-            plt.axis('square')
-            # plt.axis('scaled')
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
+        plt.xlabel('X-Axis')
+        plt.ylabel('Y-Axis')
+        plt.axis('square')
         st.write("axis() 함수는 아래와 같이 축에 관한 다양한 옵션을 제공합니다.")
         st.write("'on' | 'off' | 'equal' | 'scaled' | 'tight' | 'auto' | 'normal' | 'image' | 'square'")
         st.write("아래의 그림은 ‘square’로 지정했을 때의 그래프입니다. 축의 길이가 동일하게 표시됩니다.")
@@ -3491,20 +3856,26 @@ Graph Title'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}축 범위 얻기")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
+plt.xlabel('X-Axis')
+plt.ylabel('Y-Axis')
 
-            plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
-            plt.xlabel('X-Axis')
-            plt.ylabel('Y-Axis')
+x_range, y_range = plt.xlim(), plt.ylim()
+print(x_range, y_range)
 
-            x_range, y_range = plt.xlim(), plt.ylim()
-            print(x_range, y_range)
+axis_range = plt.axis('scaled')
+print(axis_range)
 
-            axis_range = plt.axis('scaled')
-            print(axis_range)
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3, 4], [2, 3, 5, 10])
+        plt.xlabel('X-Axis')
+        plt.ylabel('Y-Axis')
+        x_range, y_range = plt.xlim(), plt.ylim()
+        print(x_range, y_range)
+        axis_range = plt.axis('scaled')
+        print(axis_range)
         st.pyplot(plt)
         plt.close()
         st.write("xlim(), ylim() 함수는 그래프 영역에 표시되는 X축, Y축의 범위를 각각 반환합니다.")
@@ -3515,49 +3886,68 @@ Graph Title'''
         st.write("위의 예제 그림에서 X축은 0.85에서 4.15, Y축은 1.6에서 10.4 범위로 표시되었음을 알 수 있습니다.  ")
     
     elif path == ("Matplotlib 기초", "스타일 세부 설정"):
+        import matplotlib.pyplot as plt
+        import numpy as np
         st.header(f"{idx.getHeadIdx()}선 종류 지정")
         st.write("데이터를 표현하기 위해 그려지는 선의 종류를 지정하는 방법을 소개합니다.")
         st.write("선 종류를 나타내는 문자열 또는 튜플을 이용해서 다양한 선의 종류를 구현할 수 있습니다.")
 
-        st.subheader(f"{idx.getSubIdx()}기본 사용")
+        st.subheader(f"{idx.getSubIdx()}포맷 문자열 사용하기")
         st.write("데이터를 표현하기 위해 그려지는 선의 종류를 지정하는 방법을 소개합니다.")
         st.write("선 종류를 나타내는 문자열 또는 튜플을 이용해서 다양한 선의 종류를 구현할 수 있습니다.")
         st.write("**< line의 종류 >**")
-        st.write("◾ '-' solid line style")
-        st.write("◾ '--' dashed line style")
-        st.write("◾ '-.' dash-dot line style")
-        st.write("◾ ':' dotted line style")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        st.write("- '-' solid line style")
+        st.write("- '--' dashed line style")
+        st.write("- '-.' dash-dot line style")
+        st.write("- ':' dotted line style")
+        code = '''
+import matplotlib.pyplot as plt
 
-            plt.plot([1, 2, 3], [4, 4, 4], '-', color='C0', label='Solid')
-            plt.plot([1, 2, 3], [3, 3, 3], '--', color='C0', label='Dashed')
-            plt.plot([1, 2, 3], [2, 2, 2], ':', color='C0', label='Dotted')
-            plt.plot([1, 2, 3], [1, 1, 1], '-.', color='C0', label='Dash-dot')
-            plt.xlabel('X-Axis')
-            plt.ylabel('Y-Axis')
-            plt.axis([0.8, 3.2, 0.5, 5.0])
-            plt.legend(loc='upper right', ncol=4)
-            plt.show()
+plt.plot([1, 2, 3], [4, 4, 4], '-', color='C0', label='Solid')
+plt.plot([1, 2, 3], [3, 3, 3], '--', color='C0', label='Dashed')
+plt.plot([1, 2, 3], [2, 2, 2], ':', color='C0', label='Dotted')
+plt.plot([1, 2, 3], [1, 1, 1], '-.', color='C0', label='Dash-dot')
+plt.xlabel('X-Axis')
+plt.ylabel('Y-Axis')
+plt.axis([0.8, 3.2, 0.5, 5.0])
+plt.legend(loc='upper right', ncol=4)
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3], [4, 4, 4], '-', color='C0', label='Solid')
+        plt.plot([1, 2, 3], [3, 3, 3], '--', color='C0', label='Dashed')
+        plt.plot([1, 2, 3], [2, 2, 2], ':', color='C0', label='Dotted')
+        plt.plot([1, 2, 3], [1, 1, 1], '-.', color='C0', label='Dash-dot')
+        plt.xlabel('X-Axis')
+        plt.ylabel('Y-Axis')
+        plt.axis([0.8, 3.2, 0.5, 5.0])
+        plt.legend(loc='upper right', ncol=4)
         st.write("Matplotlib에서 선의 종류를 지정하는 가장 간단한 방법은 포맷 문자열을 사용하는 것입니다.")
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}linestyle 지정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-
-            plt.plot([1, 2, 3], [4, 4, 4], linestyle='solid', color='C0', label="'solid'")
-            plt.plot([1, 2, 3], [3, 3, 3], linestyle='dashed', color='C0', label="'dashed'")
-            plt.plot([1, 2, 3], [2, 2, 2], linestyle='dotted', color='C0', label="'dotted'")
-            plt.plot([1, 2, 3], [1, 1, 1], linestyle='dashdot', color='C0', label="'dashdot'")
-            plt.xlabel('X-Axis')
-            plt.ylabel('Y-Axis')
-            plt.axis([0.8, 3.2, 0.5, 5.0])
-            plt.legend(loc='upper right', ncol=4)
-            plt.tight_layout()
-            plt.show()
+        code = '''
+plt.plot([1, 2, 3], [4, 4, 4], linestyle='solid', color='C0', label="'solid'")
+plt.plot([1, 2, 3], [3, 3, 3], linestyle='dashed', color='C0', label="'dashed'")
+plt.plot([1, 2, 3], [2, 2, 2], linestyle='dotted', color='C0', label="'dotted'")
+plt.plot([1, 2, 3], [1, 1, 1], linestyle='dashdot', color='C0', label="'dashdot'")
+plt.xlabel('X-Axis')
+plt.ylabel('Y-Axis')
+plt.axis([0.8, 3.2, 0.5, 5.0])
+plt.legend(loc='upper right', ncol=4)
+plt.tight_layout()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3], [4, 4, 4], linestyle='solid', color='C0', label="'solid'")
+        plt.plot([1, 2, 3], [3, 3, 3], linestyle='dashed', color='C0', label="'dashed'")
+        plt.plot([1, 2, 3], [2, 2, 2], linestyle='dotted', color='C0', label="'dotted'")
+        plt.plot([1, 2, 3], [1, 1, 1], linestyle='dashdot', color='C0', label="'dashdot'")
+        plt.xlabel('X-Axis')
+        plt.ylabel('Y-Axis')
+        plt.axis([0.8, 3.2, 0.5, 5.0])
+        plt.legend(loc='upper right', ncol=4)
+        plt.tight_layout()
         st.write("**plot()** 함수의 **linestyle** 파라미터 값을 직접 지정할 수 있습니다.")
         st.write("포맷 문자열과 같이 ‘solid’, ‘dashed’, ‘dotted’, dashdot’ 네가지의 선 종류를 지정할 수 있습니다.")
         st.pyplot(plt)
@@ -3565,19 +3955,27 @@ Graph Title'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}튜플 사용하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-
-            plt.plot([1, 2, 3], [4, 4, 4], linestyle=(0, (1, 1)), color='C0', label='(0, (1, 1))')
-            plt.plot([1, 2, 3], [3, 3, 3], linestyle=(0, (1, 5)), color='C0', label='(0, (1, 5))')
-            plt.plot([1, 2, 3], [2, 2, 2], linestyle=(0, (5, 1)), color='C0', label='(0, (5, 1))')
-            plt.plot([1, 2, 3], [1, 1, 1], linestyle=(0, (3, 5, 1, 5)), color='C0', label='(0, (3, 5, 1, 5))')
-            plt.xlabel('X-Axis')
-            plt.ylabel('Y-Axis')
-            plt.axis([0.8, 3.2, 0.5, 5.0])
-            plt.legend(loc='upper right', ncol=2)
-            plt.tight_layout()
-            plt.show()
+        code = '''
+plt.plot([1, 2, 3], [4, 4, 4], linestyle=(0, (1, 1)), color='C0', label='(0, (1, 1))')
+plt.plot([1, 2, 3], [3, 3, 3], linestyle=(0, (1, 5)), color='C0', label='(0, (1, 5))')
+plt.plot([1, 2, 3], [2, 2, 2], linestyle=(0, (5, 1)), color='C0', label='(0, (5, 1))')
+plt.plot([1, 2, 3], [1, 1, 1], linestyle=(0, (3, 5, 1, 5)), color='C0', label='(0, (3, 5, 1, 5))')
+plt.xlabel('X-Axis')
+plt.ylabel('Y-Axis')
+plt.axis([0.8, 3.2, 0.5, 5.0])
+plt.legend(loc='upper right', ncol=2)
+plt.tight_layout()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3], [4, 4, 4], linestyle=(0, (1, 1)), color='C0', label='(0, (1, 1))')
+        plt.plot([1, 2, 3], [3, 3, 3], linestyle=(0, (1, 5)), color='C0', label='(0, (1, 5))')
+        plt.plot([1, 2, 3], [2, 2, 2], linestyle=(0, (5, 1)), color='C0', label='(0, (5, 1))')
+        plt.plot([1, 2, 3], [1, 1, 1], linestyle=(0, (3, 5, 1, 5)), color='C0', label='(0, (3, 5, 1, 5))')
+        plt.xlabel('X-Axis')
+        plt.ylabel('Y-Axis')
+        plt.axis([0.8, 3.2, 0.5, 5.0])
+        plt.legend(loc='upper right', ncol=2)
+        plt.tight_layout()
         st.write("튜플을 사용해서 선의 종류를 커스터마이즈할 수 있습니다.")
         st.write("예를 들어, (0, (1, 1))은 ‘dotted’와 같고, (0, (5, 5))는 ‘dashed’와 같습니다. 또한 (0, (3, 5, 1, 5))는 ‘dashdotted’와 같습니다.")
         st.pyplot(plt)
@@ -3585,65 +3983,81 @@ Graph Title'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}선 끝 모양 지정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+plt.plot([1, 2, 3], [4, 4, 4], linestyle='solid', linewidth=10,
+    solid_capstyle='butt', color='C0', label='solid+butt')
+plt.plot([1, 2, 3], [3, 3, 3], linestyle='solid', linewidth=10,
+    solid_capstyle='round', color='C0', label='solid+round')
 
-            plt.plot([1, 2, 3], [4, 4, 4], linestyle='solid', linewidth=10,
-                solid_capstyle='butt', color='C0', label='solid+butt')
-            plt.plot([1, 2, 3], [3, 3, 3], linestyle='solid', linewidth=10,
-                solid_capstyle='round', color='C0', label='solid+round')
-
-            plt.plot([1, 2, 3], [2, 2, 2], linestyle='dashed', linewidth=10,
-                dash_capstyle='butt', color='C1', label='dashed+butt')
-            plt.plot([1, 2, 3], [1, 1, 1], linestyle='dashed', linewidth=10,
-                dash_capstyle='round', color='C1', label='dashed+round')
+plt.plot([1, 2, 3], [2, 2, 2], linestyle='dashed', linewidth=10,
+    dash_capstyle='butt', color='C1', label='dashed+butt')
+plt.plot([1, 2, 3], [1, 1, 1], linestyle='dashed', linewidth=10,
+    dash_capstyle='round', color='C1', label='dashed+round')
 
 
-            plt.xlabel('X-Axis')
-            plt.ylabel('Y-Axis')
-            plt.axis([0.8, 3.2, 0.5, 5.0])
-            plt.legend(loc='upper right', ncol=2)
-            plt.tight_layout()
-            plt.show()
+plt.xlabel('X-Axis')
+plt.ylabel('Y-Axis')
+plt.axis([0.8, 3.2, 0.5, 5.0])
+plt.legend(loc='upper right', ncol=2)
+plt.tight_layout()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3], [4, 4, 4], linestyle='solid', linewidth=10,
+            solid_capstyle='butt', color='C0', label='solid+butt')
+        plt.plot([1, 2, 3], [3, 3, 3], linestyle='solid', linewidth=10,
+            solid_capstyle='round', color='C0', label='solid+round')
+
+        plt.plot([1, 2, 3], [2, 2, 2], linestyle='dashed', linewidth=10,
+            dash_capstyle='butt', color='C1', label='dashed+butt')
+        plt.plot([1, 2, 3], [1, 1, 1], linestyle='dashed', linewidth=10,
+            dash_capstyle='round', color='C1', label='dashed+round')
+        plt.xlabel('X-Axis')
+        plt.ylabel('Y-Axis')
+        plt.axis([0.8, 3.2, 0.5, 5.0])
+        plt.legend(loc='upper right', ncol=2)
+        plt.tight_layout()
         st.write("**plot()** 함수의 **solid_capstyle, dash_capstyle** 를 사용해서 선의 끝 모양을 지정할 수 있습니다.")
         st.write("각각 ‘butt’, ‘round’로 지정하면 아래 그림과 같이 뭉뚝한, 둥근 끝 모양이 나타납니다.")
         st.pyplot(plt)
         plt.close()
+        st.divider()
 
         st.header(f"{idx.getHeadIdx()}마커 지정")
         st.write("특별한 설정이 없으면 그래프가 실선으로 그려지지만, 위의 그림과 같은 마커 형태의 그래프를 그릴 수 있습니다.")
         st.write("**plot()** 함수의 **포맷 문자열 (Format string)** 을 사용해서 그래프의 선과 마커를 지정하는 방법에 대해 알아봅니다.")
         st.subheader(f"{idx.getSubIdx()}기본 사용")
         st.write("**< marker의 종류 >**")
-        st.write("◾ '.' point marker")
-        st.write("◾ ',' pixel marker")
-        st.write("◾ 'o' circle marker")
-        st.write("◾ 'v' triangle_down marker")
-        st.write("◾ '^' triangle_up marker")
-        st.write("◾ '<' triangle_left marker")
-        st.write("◾ >' triangle_right marker")
-        st.write("◾ '1' tri_down marker")
-        st.write("◾ '2' tri_up marker")
-        st.write("◾ '3' tri_left marker")
-        st.write("◾ '4' tri_right marker")
-        st.write("◾ 's ' square marker")
-        st.write("◾ 'p' pentagon marker")
-        st.write("◾ '*' star marker")
-        st.write("◾ 'h' hexagon1 marker")
-        st.write("◾ 'H' hexagon2 marker")
-        st.write("◾ '+' plus marker")
-        st.write("◾ 'x' x marker")
-        st.write("◾ 'D' diamond marker")
-        st.write("◾ 'd' thin_diamond marker")
-        st.write("◾ '|' vline marker")
-        st.write("◾ '_' hline marker")
-        with st.echo():
-            import matplotlib.pyplot as plt
-
-            plt.plot([1, 2, 3, 4], [2, 3, 5, 10], 'bo')
-            plt.xlabel('X-Axis')
-            plt.ylabel('Y-Axis')
-            plt.show()
+        st.write("- '.' point marker")
+        st.write("- ',' pixel marker")
+        st.write("- 'o' circle marker")
+        st.write("- 'v' triangle_down marker")
+        st.write("- '^' triangle_up marker")
+        st.write("- '<' triangle_left marker")
+        st.write("- '>' triangle_right marker")
+        st.write("- '1' tri_down marker")
+        st.write("- '2' tri_up marker")
+        st.write("- '3' tri_left marker")
+        st.write("- '4' tri_right marker")
+        st.write("- 's ' square marker")
+        st.write("- 'p' pentagon marker")
+        st.write("- '*' star marker")
+        st.write("- 'h' hexagon1 marker")
+        st.write("- 'H' hexagon2 marker")
+        st.write("- '+' plus marker")
+        st.write("- 'x' x marker")
+        st.write("- 'D' diamond marker")
+        st.write("- 'd' thin_diamond marker")
+        st.write("- '|' vline marker")
+        st.write("- '_' hline marker")
+        code = '''
+plt.plot([1, 2, 3, 4], [2, 3, 5, 10], 'bo')
+plt.xlabel('X-Axis')
+plt.ylabel('Y-Axis')
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3, 4], [2, 3, 5, 10], 'bo')
+        plt.xlabel('X-Axis')
+        plt.ylabel('Y-Axis')
         st.write("**plot()** 함수에 **‘bo’** 를 입력해주면 파란색의 원형 마커로 그래프가 표시됩니다.")
         st.write("‘b’는 blue, ‘o’는 circle을 나타내는 문자입니다.")
         st.pyplot(plt)
@@ -3651,14 +4065,16 @@ Graph Title'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}선/마커 동시에 나타내기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-
-            # plt.plot([1, 2, 3, 4], [2, 3, 5, 10], 'bo-')    # 파란색 + 마커 + 실선
-            plt.plot([1, 2, 3, 4], [2, 3, 5, 10], 'bo--')     # 파란색 + 마커 + 점선
-            plt.xlabel('X-Axis')
-            plt.ylabel('Y-Axis')
-            plt.show()
+        code = '''
+# plt.plot([1, 2, 3, 4], [2, 3, 5, 10], 'bo-')    # 파란색 + 마커 + 실선
+plt.plot([1, 2, 3, 4], [2, 3, 5, 10], 'bo--')     # 파란색 + 마커 + 점선
+plt.xlabel('X-Axis')
+plt.ylabel('Y-Axis')
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3, 4], [2, 3, 5, 10], 'bo--')
+        plt.xlabel('X-Axis')
+        plt.ylabel('Y-Axis')
         st.write("**‘bo-‘** 는 파란색의 원형 마커와 실선 (Solid line)을 의미합니다.")
         st.write("또한 **‘bo- -‘** 는 파란색의 원형 마커와 점선 (Dashed line)을 의미합니다.")
         st.pyplot(plt)
@@ -3674,73 +4090,91 @@ Graph Title'''
 '--'    # dashed line with default color
 'k^:'   # black triangle_up markers connected by a dotted line
 '''
-        st.code(code, language="python")
+        st.code(code, language="python", line_numbers=True)
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}marker 파라미터 사용하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-
-            plt.plot([4, 5, 6], marker="H")
-            plt.plot([3, 4, 5], marker="d")
-            plt.plot([2, 3, 4], marker="x")
-            plt.plot([1, 2, 3], marker=11)
-            plt.plot([0, 1, 2], marker='$Z$')
-            plt.show()
+        code = '''
+plt.plot([4, 5, 6], marker="H")
+plt.plot([3, 4, 5], marker="d")
+plt.plot([2, 3, 4], marker="x")
+plt.plot([1, 2, 3], marker=11)
+plt.plot([0, 1, 2], marker='$Z$')
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([4, 5, 6], marker="H")
+        plt.plot([3, 4, 5], marker="d")
+        plt.plot([2, 3, 4], marker="x")
+        plt.plot([1, 2, 3], marker=11)
+        plt.plot([0, 1, 2], marker='$Z$')
         st.write("**plot()** 함수의 marker 파라미터를 사용하면 더욱 다양한 마커 형태를 지정할 수 있습니다.")
         st.write("예제에서 다섯가지 마커를 지정했습니다.")
         st.pyplot(plt)
         plt.close()
+        st.divider()
     
         st.header(f"{idx.getHeadIdx()}색상 지정")
         st.write("**matplotlib.pyplot** 모듈의 **plot()** 함수를 사용해서 그래프를 나타낼 때, 색상을 지정하는 다양한 방법에 대해 소개합니다.")
         
         st.subheader(f"{idx.getSubIdx()}기본 색상")
         st.write("**< color의 종류 >**")
-        st.write("◾ 'b' blue")
-        st.write("◾ 'g' green")
-        st.write("◾ 'r' red")
-        st.write("◾ 'c' cyan")
-        st.write("◾ 'm' magenta")
-        st.write("◾ 'y' yellow")
-        st.write("◾ 'k' black")
-        st.write("◾ 'w' white")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        st.write("- 'b' blue")
+        st.write("- 'g' green")
+        st.write("- 'r' red")
+        st.write("- 'c' cyan")
+        st.write("- 'm' magenta")
+        st.write("- 'y' yellow")
+        st.write("- 'k' black")
+        st.write("- 'w' white")
+        code = '''
+import numpy as np
 
-            plt.plot(np.arange(10), np.arange(10)*2, marker='o', linestyle='-', color='b')
-            plt.plot(np.arange(10), np.arange(10)*2 - 10, marker='v', linestyle='--', color='c')
-            plt.plot(np.arange(10), np.arange(10)*2 - 20, marker='+', linestyle='-.', color='y')
-            plt.plot(np.arange(10), np.arange(10)*2 - 30, marker='*', linestyle=':', color='r')
+plt.plot(np.arange(10), np.arange(10)*2, marker='o', linestyle='-', color='b')
+plt.plot(np.arange(10), np.arange(10)*2 - 10, marker='v', linestyle='--', color='c')
+plt.plot(np.arange(10), np.arange(10)*2 - 20, marker='+', linestyle='-.', color='y')
+plt.plot(np.arange(10), np.arange(10)*2 - 30, marker='*', linestyle=':', color='r')
 
-            # 타이틀 & font 설정
-            plt.title('색상 설정 예제', fontsize=10)
+# 타이틀 & font 설정
+plt.title('색상 설정 예제', fontsize=10)
 
-            # X축 & Y축 Label 설정
-            plt.xlabel('X축', fontsize=10)
-            plt.ylabel('Y축', fontsize=10)
+# X축 & Y축 Label 설정
+plt.xlabel('X축', fontsize=10)
+plt.ylabel('Y축', fontsize=10)
 
-            # X tick, Y tick 설정
-            plt.xticks(rotation=90)
-            plt.yticks(rotation=30)
+# X tick, Y tick 설정
+plt.xticks(rotation=90)
+plt.yticks(rotation=30)
 
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot(np.arange(10), np.arange(10)*2, marker='o', linestyle='-', color='b')
+        plt.plot(np.arange(10), np.arange(10)*2 - 10, marker='v', linestyle='--', color='c')
+        plt.plot(np.arange(10), np.arange(10)*2 - 20, marker='+', linestyle='-.', color='y')
+        plt.plot(np.arange(10), np.arange(10)*2 - 30, marker='*', linestyle=':', color='r')
+        plt.title('색상 설정 예제', fontsize=10, fontproperties=prop)
+        plt.xlabel('X축', fontsize=10, fontproperties=prop)
+        plt.ylabel('Y축', fontsize=10, fontproperties=prop)
+        plt.xticks(rotation=90)
+        plt.yticks(rotation=30)
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}color 키워드 인자 사용하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+plt.plot([1, 2, 3, 4], [2.0, 3.0, 5.0, 10.0], color='limegreen')
+plt.plot([1, 2, 3, 4], [2.0, 2.8, 4.3, 6.5], color='violet')
+plt.plot([1, 2, 3, 4], [2.0, 2.5, 3.3, 4.5], color='dodgerblue')
+plt.xlabel('X-Axis')
+plt.ylabel('Y-Axis')
 
-            plt.plot([1, 2, 3, 4], [2.0, 3.0, 5.0, 10.0], color='limegreen')
-            plt.plot([1, 2, 3, 4], [2.0, 2.8, 4.3, 6.5], color='violet')
-            plt.plot([1, 2, 3, 4], [2.0, 2.5, 3.3, 4.5], color='dodgerblue')
-            plt.xlabel('X-Axis')
-            plt.ylabel('Y-Axis')
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3, 4], [2.0, 3.0, 5.0, 10.0], color='limegreen')
+        plt.plot([1, 2, 3, 4], [2.0, 2.8, 4.3, 6.5], color='violet')
+        plt.plot([1, 2, 3, 4], [2.0, 2.5, 3.3, 4.5], color='dodgerblue')
+        plt.xlabel('X-Axis')
+        plt.ylabel('Y-Axis')
         st.write("**color** 키워드 인자를 사용해서 더 다양한 색상의 이름을 지정할 수 있습니다.")
         st.write("**plot()** 함수에 **color=’limegreen’** 과 같이 입력하면, limegreen에 해당하는 색깔이 표시됩니다.")
         st.pyplot(plt)
@@ -3748,31 +4182,38 @@ Graph Title'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}포맷 문자열 사용하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+plt.plot([1, 2, 3, 4], [2.0, 3.0, 5.0, 10.0], 'r')
+plt.plot([1, 2, 3, 4], [2.0, 2.8, 4.3, 6.5], 'g')
+plt.plot([1, 2, 3, 4], [2.0, 2.5, 3.3, 4.5], 'b')
+plt.xlabel('X-Axis')
+plt.ylabel('Y-Axis')
 
-            plt.plot([1, 2, 3, 4], [2.0, 3.0, 5.0, 10.0], 'r')
-            plt.plot([1, 2, 3, 4], [2.0, 2.8, 4.3, 6.5], 'g')
-            plt.plot([1, 2, 3, 4], [2.0, 2.5, 3.3, 4.5], 'b')
-            plt.xlabel('X-Axis')
-            plt.ylabel('Y-Axis')
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3, 4], [2.0, 3.0, 5.0, 10.0], 'r')
+        plt.plot([1, 2, 3, 4], [2.0, 2.8, 4.3, 6.5], 'g')
+        plt.plot([1, 2, 3, 4], [2.0, 2.5, 3.3, 4.5], 'b')
+        plt.xlabel('X-Axis')
+        plt.ylabel('Y-Axis')
         st.write("**plot()** 함수의 **포맷 문자열 (Format string)** 을 사용해서 실선의 색상을 지정했습니다.")
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}Hex code 사용하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+plt.plot([1, 2, 3, 4], [2, 3, 5, 10], color='#e35f62',
+        marker='o', linestyle='--')
+plt.xlabel('X-Axis')
+plt.ylabel('Y-Axis')
 
-            plt.plot([1, 2, 3, 4], [2, 3, 5, 10], color='#e35f62',
-                    marker='o', linestyle='--')
-            plt.xlabel('X-Axis')
-            plt.ylabel('Y-Axis')
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1, 2, 3, 4], [2, 3, 5, 10], color='#e35f62',
+                marker='o', linestyle='--')
+        plt.xlabel('X-Axis')
+        plt.ylabel('Y-Axis')
         st.write("**16진수 코드 (Hex code)** 로 더욱 다양한 색상을 지정할 수 있습니다.")
         st.write("이번에는 **선의 색상** 과 함께 **마커와 선의 종류** 까지 모두 지정해 보겠습니다.")
         st.write("**marker**는 마커 스타일, **linestyle** 는 선의 스타일을 지정합니다.")
@@ -3782,65 +4223,83 @@ Graph Title'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}투명도 설정")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+plt.plot(np.arange(10), np.arange(10)*2, color='b', alpha=0.1)
+plt.plot(np.arange(10), np.arange(10)*2 - 10, color='b', alpha=0.3)
+plt.plot(np.arange(10), np.arange(10)*2 - 20, color='b', alpha=0.6)
+plt.plot(np.arange(10), np.arange(10)*2 - 30, color='b', alpha=1.0)
 
-            plt.plot(np.arange(10), np.arange(10)*2, color='b', alpha=0.1)
-            plt.plot(np.arange(10), np.arange(10)*2 - 10, color='b', alpha=0.3)
-            plt.plot(np.arange(10), np.arange(10)*2 - 20, color='b', alpha=0.6)
-            plt.plot(np.arange(10), np.arange(10)*2 - 30, color='b', alpha=1.0)
+# 타이틀 & font 설정
+plt.title('투명도 (alpha) 설정 예제', fontsize=10)
 
-            # 타이틀 & font 설정
-            plt.title('투명도 (alpha) 설정 예제', fontsize=10)
+# X축 & Y축 Label 설정
+plt.xlabel('X축', fontsize=10)
+plt.ylabel('Y축', fontsize=10)
 
-            # X축 & Y축 Label 설정
-            plt.xlabel('X축', fontsize=10)
-            plt.ylabel('Y축', fontsize=10)
+# X tick, Y tick 설정
+plt.xticks(rotation=90)
+plt.yticks(rotation=30)
 
-            # X tick, Y tick 설정
-            plt.xticks(rotation=90)
-            plt.yticks(rotation=30)
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot(np.arange(10), np.arange(10)*2, color='b', alpha=0.1)
+        plt.plot(np.arange(10), np.arange(10)*2 - 10, color='b', alpha=0.3)
+        plt.plot(np.arange(10), np.arange(10)*2 - 20, color='b', alpha=0.6)
+        plt.plot(np.arange(10), np.arange(10)*2 - 30, color='b', alpha=1.0)
+        plt.title('투명도 (alpha) 설정 예제', fontsize=10, fontproperties=prop)
+        plt.xlabel('X축', fontsize=10, fontproperties=prop)
+        plt.ylabel('Y축', fontsize=10, fontproperties=prop)
+        plt.xticks(rotation=90)
+        plt.yticks(rotation=30)
         st.pyplot(plt)
         plt.close()
 
     elif path == ("Matplotlib 기초", "Grid, Annotate"):
+        import matplotlib.pyplot as plt
+        import numpy as np
         st.header(f"{idx.getHeadIdx()}그리드(Grid)")
         st.write("데이터의 위치를 더 명확하게 나타내기 위해 그래프에 그리드 **(Grid, 격자)** 를 표시할 수 있습니다.")
         st.write("**matplotlib.pyplot** 모듈의 **grid()** 함수를 이용해서 그래프에 다양하게 그리드를 설정해 보겠습니다.")
         st.subheader(f"{idx.getSubIdx()}기본 사용")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+import matplotlib.pyplot as plt
+import numpy as np
 
-            x = np.arange(0, 2, 0.2)
+x = np.arange(0, 2, 0.2)
 
-            plt.plot(x, x, 'bo')
-            plt.plot(x, x**2, color='#e35f62', marker='*', linewidth=2)
-            plt.plot(x, x**3, color='springgreen', marker='^', markersize=9)
-            plt.grid(True)
+plt.plot(x, x, 'bo')
+plt.plot(x, x**2, color='#e35f62', marker='*', linewidth=2)
+plt.plot(x, x**3, color='springgreen', marker='^', markersize=9)
+plt.grid(True)
 
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        x = np.arange(0, 2, 0.2)
+        plt.plot(x, x, 'bo')
+        plt.plot(x, x**2, color='#e35f62', marker='*', linewidth=2)
+        plt.plot(x, x**3, color='springgreen', marker='^', markersize=9)
+        plt.grid(True)
         st.write("**plt.grid(True)** 와 같이 설정하면, 그래프의 x, y축에 대해 그리드가 표시됩니다.")
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}축 지정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+x = np.arange(0, 2, 0.2)
 
-            x = np.arange(0, 2, 0.2)
+plt.plot(x, x, 'bo')
+plt.plot(x, x**2, color='#e35f62', marker='*', linewidth=2)
+plt.plot(x, x**3, color='forestgreen', marker='^', markersize=9)
+plt.grid(True, axis='y')
 
-            plt.plot(x, x, 'bo')
-            plt.plot(x, x**2, color='#e35f62', marker='*', linewidth=2)
-            plt.plot(x, x**3, color='forestgreen', marker='^', markersize=9)
-            plt.grid(True, axis='y')
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        x = np.arange(0, 2, 0.2)
+        plt.plot(x, x, 'bo')
+        plt.plot(x, x**2, color='#e35f62', marker='*', linewidth=2)
+        plt.plot(x, x**3, color='forestgreen', marker='^', markersize=9)
+        plt.grid(True, axis='y')
         st.write("**axis=y** 로 설정하면 가로 방향의 그리드만 표시됩니다.")
         st.write("{‘both’, ‘x’, ‘y’} 중 선택할 수 있고 디폴트는 ‘both’입니다.")
         st.pyplot(plt)
@@ -3848,72 +4307,103 @@ Graph Title'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}스타일 설정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+x = np.arange(0, 2, 0.2)
 
-            x = np.arange(0, 2, 0.2)
+plt.plot(x, x, 'bo')
+plt.plot(x, x**2, color='#e35f62', marker='*', linewidth=2)
+plt.plot(x, x**3, color='springgreen', marker='^', markersize=9)
+plt.grid(True, axis='y', color='red', alpha=0.5, linestyle='--')
 
-            plt.plot(x, x, 'bo')
-            plt.plot(x, x**2, color='#e35f62', marker='*', linewidth=2)
-            plt.plot(x, x**3, color='springgreen', marker='^', markersize=9)
-            plt.grid(True, axis='y', color='red', alpha=0.5, linestyle='--')
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        x = np.arange(0, 2, 0.2)
+        plt.plot(x, x, 'bo')
+        plt.plot(x, x**2, color='#e35f62', marker='*', linewidth=2)
+        plt.plot(x, x**3, color='springgreen', marker='^', markersize=9)
+        plt.grid(True, axis='y', color='red', alpha=0.5, linestyle='--')
 
-            plt.show()
         st.write("**color, alpha, linestyle** 파마리터를 사용해서 그리드 선의 스타일을 설정했습니다.")
         st.write("또한 **which** 파라미터를 ‘major’, ‘minor’, ‘both’ 등으로 사용하면 주눈금, 보조눈금에 각각 그리드를 표시할 수 있습니다.")
         st.pyplot(plt)
         plt.close()
+        st.divider()
 
         st.header(f"{idx.getHeadIdx()}Annotate 설정")
+        st.write("annotate 함수는 그래프에 주석을 추가할 때 사용되며, 특히 데이터의 포인트나 위치에 텍스트나 화살표를 함께 표시할 수 있게 해줍니다.")
+        st.write("이 함수를 사용하여 그래프에서 중요한 정보를 강조하거나 설명하는 데 활용할 수 있습니다.")
         st.subheader(f"{idx.getSubIdx()}기본 사용")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code  = '''plt.annotate(s, xy, xytext, arrowprops, **kwargs)'''
+        st.code(code, language='python')
+        st.write("- s : 주석으로 표시할 텍스트 내용입니다. string으로 값을 넣어야 합니다.")
+        st.write("- xy : 주석을 추가할 데이터 포인트의 위치 입니다. 튜플 형태의 (x,y)좌표 입니다.")
+        st.write("- arrowprops : 화살표 스타일과 속성을 설정은 인자로 사전(dictionary) 타입의 값이 들어갑니다.")
+        st.caption("화살표를 사용하지 않으려면 arrowprops=None으로 설정합니다.")
+        st.write("- **kwargs : 추가적인 매개변수로, 텍스트 스타일이나 기타 속성을 지정할 수 있습니다.")
+        code = '''
+plt.plot(np.arange(10), np.arange(10)*2, marker='o', linestyle='-', color='b')
+plt.plot(np.arange(10), np.arange(10)*2 - 10, marker='v', linestyle='--', color='c')
+plt.plot(np.arange(10), np.arange(10)*2 - 20, marker='+', linestyle='-.', color='y')
+plt.plot(np.arange(10), np.arange(10)*2 - 30, marker='*', linestyle=':', color='r')
 
-            plt.plot(np.arange(10), np.arange(10)*2, marker='o', linestyle='-', color='b')
-            plt.plot(np.arange(10), np.arange(10)*2 - 10, marker='v', linestyle='--', color='c')
-            plt.plot(np.arange(10), np.arange(10)*2 - 20, marker='+', linestyle='-.', color='y')
-            plt.plot(np.arange(10), np.arange(10)*2 - 30, marker='*', linestyle=':', color='r')
+# 타이틀 & font 설정
+plt.title('그리드 설정 예제', fontsize=10)
 
-            # 타이틀 & font 설정
-            plt.title('그리드 설정 예제', fontsize=10)
+# X축 & Y축 Label 설정
+plt.xlabel('X축', fontsize=10)
+plt.ylabel('Y축', fontsize=10)
 
-            # X축 & Y축 Label 설정
-            plt.xlabel('X축', fontsize=10)
-            plt.ylabel('Y축', fontsize=10)
+# X tick, Y tick 설정
+plt.xticks(rotation=90)
+plt.yticks(rotation=30)
 
-            # X tick, Y tick 설정
-            plt.xticks(rotation=90)
-            plt.yticks(rotation=30)
+# annotate 설정
+plt.annotate('코로나 사태 발생 지점', xy=(3, -20), xytext=(3, -25), arrowprops=dict(facecolor='black', shrink=0.05))
 
-            # annotate 설정
-            plt.annotate('코로나 사태 발생 지점', xy=(3, -20), xytext=(3, -25), arrowprops=dict(facecolor='black', shrink=0.05))
+# grid 옵션 추가
+plt.grid()
 
-            # grid 옵션 추가
-            plt.grid()
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot(np.arange(10), np.arange(10)*2, marker='o', linestyle='-', color='b')
+        plt.plot(np.arange(10), np.arange(10)*2 - 10, marker='v', linestyle='--', color='c')
+        plt.plot(np.arange(10), np.arange(10)*2 - 20, marker='+', linestyle='-.', color='y')
+        plt.plot(np.arange(10), np.arange(10)*2 - 30, marker='*', linestyle=':', color='r')
+        plt.title('그리드 설정 예제', fontsize=10, fontproperties=prop)
+        plt.xlabel('X축', fontsize=10, fontproperties=prop)
+        plt.ylabel('Y축', fontsize=10, fontproperties=prop)
+        plt.xticks(rotation=90)
+        plt.yticks(rotation=30)
+        plt.annotate('코로나 사태 발생 지점', xy=(3, -20), xytext=(3, -25), arrowprops=dict(facecolor='black', shrink=0.05), fontproperties=prop)
+        plt.grid()
         st.pyplot(plt)
         plt.close()
 
-    elif path == ("Matplotlib 기초", "Plot"):
+    elif path == ("Matplotlib 기초", "다양한 Plot"):
+        import matplotlib.pyplot as plt
+        import numpy as np
         st.header(f"{idx.getHeadIdx()}Scatterplot")
         st.write("**산점도 (Scatter plot)** 는 두 변수의 상관 관계를 직교 좌표계의 평면에 점으로 표현하는 그래프입니다.")
         st.write("**matplotlib.pyplot** 모듈의 **scatter()** 함수를 이용하면 산점도를 그릴 수 있습니다.")
         st.subheader(f"{idx.getSubIdx()}기본 사용")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+import matplotlib.pyplot as plt
+import numpy as np
 
-            np.random.seed(0)
+np.random.seed(0)
 
-            n = 50
-            x = np.random.rand(n)
-            y = np.random.rand(n)
+n = 50
+x = np.random.rand(n)
+y = np.random.rand(n)
 
-            plt.scatter(x, y)
-            plt.show()
+plt.scatter(x, y)
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        np.random.seed(0)
+        n = 50
+        x = np.random.rand(n)
+        y = np.random.rand(n)
+        plt.scatter(x, y)
         st.write("NumPy의 :blue[random 모듈]에 포함된 rand() 함수를 사용해서 [0, 1) 범위의 난수를 각각 50개씩 생성했습니다.")
         st.write("x, y 데이터를 순서대로 scatter() 함수에 입력하면 x, y 값에 해당하는 위치에 기본 마커가 표시됩니다.")
         st.pyplot(plt)
@@ -3921,20 +4411,25 @@ Graph Title'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}색상과 크기 지정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+np.random.seed(0)
 
-            np.random.seed(0)
+n = 50
+x = np.random.rand(n)
+y = np.random.rand(n)
+area = (30 * np.random.rand(n))**2
+colors = np.random.rand(n)
 
-            n = 50
-            x = np.random.rand(n)
-            y = np.random.rand(n)
-            area = (30 * np.random.rand(n))**2
-            colors = np.random.rand(n)
-
-            plt.scatter(x, y, s=area, c=colors)
-            plt.show()
+plt.scatter(x, y, s=area, c=colors)
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        np.random.seed(0)
+        n = 50
+        x = np.random.rand(n)
+        y = np.random.rand(n)
+        area = (30 * np.random.rand(n))**2
+        colors = np.random.rand(n)
+        plt.scatter(x, y, s=area, c=colors)
         st.write("scatter() 함수의 **s, c** 파라미터는 각각 마커의 크기와 색상을 지정합니다.")
         st.write("마커의 크기는 size**2 의 형태로 지정합니다.")
         st.write("예를 들어 **plot()** 함수에 **markersize=20** 으로 지정하는 것과 scatter() 함수에 s=20**2으로 지정하는 것은 같은 크기의 마커를 표시하도록 합니다.")
@@ -3942,216 +4437,139 @@ Graph Title'''
         st.write("마커에 임의의 크기와 색상을 지정했습니다.")
         st.pyplot(plt)
         plt.close()
-        st.divider()
 
         st.write("plot() 함수의 markersize 지정과 scatter() 함수의 s (size) 지정에 대해서는 아래의 예제를 참고하세요.")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+plt.plot([1], [1], 'o', markersize=20, c='#FF5733')
+plt.scatter([2], [1], s=20**2, c='#33FFCE')
 
-            plt.plot([1], [1], 'o', markersize=20, c='#FF5733')
-            plt.scatter([2], [1], s=20**2, c='#33FFCE')
-
-            plt.text(0.5, 1.05, 'plot(markersize=20)', fontdict={'size': 14})
-            plt.text(1.6, 1.05, 'scatter(s=20**2)', fontdict={'size': 14})
-            plt.axis([0.4, 2.6, 0.8, 1.2])
-            plt.show()
+plt.text(0.5, 1.05, 'plot(markersize=20)', fontdict={'size': 14})
+plt.text(1.6, 1.05, 'scatter(s=20**2)', fontdict={'size': 14})
+plt.axis([0.4, 2.6, 0.8, 1.2])
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.plot([1], [1], 'o', markersize=20, c='#FF5733')
+        plt.scatter([2], [1], s=20**2, c='#33FFCE')
+        plt.text(0.5, 1.05, 'plot(markersize=20)', fontdict={'size': 14})
+        plt.text(1.6, 1.05, 'scatter(s=20**2)', fontdict={'size': 14})
+        plt.axis([0.4, 2.6, 0.8, 1.2])
         st.write("plot() 함수의 markersize를 20으로, scatter() 함수의 s를 20**2으로 지정했습니다.")
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}투명도와 컬러맵 설정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+np.random.seed(0)
 
-            np.random.seed(0)
+n = 50
+x = np.random.rand(n)
+y = np.random.rand(n)
+area = (30 * np.random.rand(n))**2
+colors = np.random.rand(n)
 
-            n = 50
-            x = np.random.rand(n)
-            y = np.random.rand(n)
-            area = (30 * np.random.rand(n))**2
-            colors = np.random.rand(n)
-
-            plt.scatter(x, y, s=area, c=colors, alpha=0.5, cmap='Spectral')
-            plt.colorbar()
-            plt.show()
+plt.scatter(x, y, s=area, c=colors, alpha=0.5, cmap='Spectral')
+plt.colorbar()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        np.random.seed(0)
+        n = 50
+        x = np.random.rand(n)
+        y = np.random.rand(n)
+        area = (30 * np.random.rand(n))**2
+        colors = np.random.rand(n)
+        plt.scatter(x, y, s=area, c=colors, alpha=0.5, cmap='Spectral')
+        plt.colorbar()
         st.write("**alpha** 파라미터는 마커의 투명도를 지정합니다. 0에서 1 사이의 값을 입력합니다.")
         st.write("**cmap** 파라미터에 컬러맵에 해당하는 문자열을 지정할 수 있습니다.")
         st.pyplot(plt)
         plt.close()
-
-        st.header(f"{idx.getHeadIdx()}Line Plot")
-        st.subheader(f"{idx.getSubIdx()}기본 lineplot 그리기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
-            
-            x = np.arange(0, 10, 0.1)
-            y = 1 + np.sin(x)
-
-            plt.plot(x, y)
-
-            plt.xlabel('x value', fontsize=15)
-            plt.ylabel('y value', fontsize=15)
-            plt.title('sin graph', fontsize=18)
-
-            plt.grid()
-
-            plt.show()
-        st.pyplot(plt)
-        plt.close()
         st.divider()
-
-        st.subheader(f"{idx.getSubIdx()}2개 이상의 그래프 그리기")
-        st.write("◾ color : 컬러 옵션")
-        st.write("◾ alpha : 투명도 옵션")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
-
-            x = np.arange(0, 10, 0.1)
-            y_1 = 1 + np.sin(x)
-            y_2 = 1 + np.cos(x)
-
-            plt.plot(x, y_1, label='1+sin', color='blue', alpha=0.3)
-            plt.plot(x, y_2, label='1+cos', color='red', alpha=0.7)
-
-            plt.xlabel('x value', fontsize=15)
-            plt.ylabel('y value', fontsize=15)
-            plt.title('sin and cos graph', fontsize=18)
-
-            plt.grid()
-            plt.legend()
-
-            plt.show()
-        st.pyplot(plt)
-        plt.close()
-        st.divider()
-
-        st.subheader(f"{idx.getSubIdx()}마커 스타일링")
-        st.write("◾ marker : 마커 옵션")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
-
-            x = np.arange(0, 10, 0.1)
-            y_1 = 1 + np.sin(x)
-            y_2 = 1 + np.cos(x)
-
-            plt.plot(x, y_1, label='1+sin', color='blue', alpha=0.3, marker='o')
-            plt.plot(x, y_2, label='1+cos', color='red', alpha=0.7, marker='+')
-
-            plt.xlabel('x value', fontsize=15)
-            plt.ylabel('y value', fontsize=15)
-            plt.title('sin and cos graph', fontsize=18)
-
-            plt.grid()
-            plt.legend()
-
-            plt.show()
-        st.pyplot(plt)
-        plt.close()
-        st.divider()
-
-        st.subheader(f"{idx.getSubIdx()}라인 스타일 변경")
-        st.write("◾ linestyle : 라인 스타일 변경 옵션")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
-
-            x = np.arange(0, 10, 0.1)
-            y_1 = 1 + np.sin(x)
-            y_2 = 1 + np.cos(x)
-
-            plt.plot(x, y_1, label='1+sin', color='blue', linestyle=':')
-            plt.plot(x, y_2, label='1+cos', color='red', linestyle='-.')
-
-            plt.xlabel('x value', fontsize=15)
-            plt.ylabel('y value', fontsize=15)
-            plt.title('sin and cos graph', fontsize=18)
-
-            plt.grid()
-            plt.legend()
-
-            plt.show()
-        st.pyplot(plt)
-        plt.close()
 
         st.header(f"{idx.getHeadIdx()}Areaplot(Filled Area)")
         st.write("matplotlib에서 area plot을 그리고자 할 때는 **fill_between** 함수를 사용합니다.")
-        code='''import matplotlib.pyplot as plt
-import numpy as np
-
+        code='''
 y = np.random.randint(low=5, high=10, size=20)
 y'''
         st.code(code, language="python")
         st.write("**[ 출력 ]**")
         code='''array([9, 8, 9, 5, 7, 6, 8, 7, 6, 5, 6, 6, 9, 7, 7, 5, 7, 8, 5, 7])'''
-        st.code(code, language="python")
+        st.code(code, language='python', line_numbers=True)
 
         st.subheader(f"{idx.getSubIdx()}기본 areaplot 그리기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+x = np.arange(1,21)
+y =  np.random.randint(low=5, high=10, size=20)
 
-            x = np.arange(1,21)
-            y =  np.random.randint(low=5, high=10, size=20)
-
-            # fill_between으로 색칠하기
-            plt.fill_between(x, y, color="green", alpha=0.6)
-            plt.show()
+# fill_between으로 색칠하기
+plt.fill_between(x, y, color="green", alpha=0.6)
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        x = np.arange(1,21)
+        y =  np.random.randint(low=5, high=10, size=20)
+        plt.fill_between(x, y, color="green", alpha=0.6)
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}경계선을 굵게 그리고 area는 옆게 그리는 효과 적용")
-        with st.echo():
-            import matplotlib.pyplot as plt
-
-            plt.fill_between(x, y, color="green", alpha=0.3)
-            plt.plot(x, y, color="green", alpha=0.8)
+        code = '''
+plt.fill_between(x, y, color="green", alpha=0.3)
+plt.plot(x, y, color="green", alpha=0.8)'''
+        st.code(code, language='python', line_numbers=True)
+        plt.fill_between(x, y, color="green", alpha=0.3)
+        plt.plot(x, y, color="green", alpha=0.8)
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}여러 그래프를 겹쳐서 표현")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+x = np.arange(1, 10, 0.05)
+y_1 =  np.cos(x)+1
+y_2 =  np.sin(x)+1
+y_3 = y_1 * y_2 / np.pi
 
-            x = np.arange(1, 10, 0.05)
-            y_1 =  np.cos(x)+1
-            y_2 =  np.sin(x)+1
-            y_3 = y_1 * y_2 / np.pi
-
-            plt.fill_between(x, y_1, color="green", alpha=0.1)
-            plt.fill_between(x, y_2, color="blue", alpha=0.2)
-            plt.fill_between(x, y_3, color="red", alpha=0.3)
+plt.fill_between(x, y_1, color="green", alpha=0.1)
+plt.fill_between(x, y_2, color="blue", alpha=0.2)
+plt.fill_between(x, y_3, color="red", alpha=0.3)'''
+        st.code(code, language='python', line_numbers=True)
+        x = np.arange(1, 10, 0.05)
+        y_1 =  np.cos(x)+1
+        y_2 =  np.sin(x)+1
+        y_3 = y_1 * y_2 / np.pi
+        plt.fill_between(x, y_1, color="green", alpha=0.1)
+        plt.fill_between(x, y_2, color="blue", alpha=0.2)
+        plt.fill_between(x, y_3, color="red", alpha=0.3)
         st.pyplot(plt)
         plt.close()
+        st.divider()
 
         st.header(f"{idx.getHeadIdx()}Box Plot")
         st.write("**박스 플롯 (Box plot)** 또는 **박스-위스커 플롯 (Box-Whisker plot)** 은 수치 데이터를 표현하는 하나의 방식입니다.")
         st.write("샘플 데이터를 생성합니다.")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
-
-            # 샘플 데이터 생성
-            spread = np.random.rand(50) * 100
-            center = np.ones(25) * 50
-            flier_high = np.random.rand(10) * 100 + 100
-            flier_low = np.random.rand(10) * -100
-            data = np.concatenate((spread, center, flier_high, flier_low))
+        code = '''
+# 샘플 데이터 생성
+spread = np.random.rand(50) * 100
+center = np.ones(25) * 50
+flier_high = np.random.rand(10) * 100 + 100
+flier_low = np.random.rand(10) * -100
+data = np.concatenate((spread, center, flier_high, flier_low))'''
+        st.code(code, language='python', line_numbers=True)
+        spread = np.random.rand(50) * 100
+        center = np.ones(25) * 50
+        flier_high = np.random.rand(10) * 100 + 100
+        flier_low = np.random.rand(10) * -100
+        data = np.concatenate((spread, center, flier_high, flier_low))
         
         st.subheader(f"{idx.getSubIdx()}기본 박스플롯 생성")
-        with st.echo():
-            import matplotlib.pyplot as plt
-
-            plt.boxplot(data)
-            plt.tight_layout()
-            plt.show()
+        code = '''
+plt.boxplot(data)
+plt.tight_layout()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.boxplot(data)
+        plt.tight_layout()
         st.pyplot(plt)
         plt.close()
         st.divider()
@@ -4159,67 +4577,87 @@ y'''
         st.subheader(f"{idx.getSubIdx()}Box Plot 축 바꾸기")
         st.write("ax.boxplot()의 vert 파라미터를 False로 지정하면 수평 방향의 박스 플롯이 나타납니다.")
         st.write("디폴트는 수직 방향의 박스 플롯입니다.")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+plt.title('Horizontal Box Plot', fontsize=15)
+plt.boxplot(data, vert=False)
 
-            plt.title('Horizontal Box Plot', fontsize=15)
-            plt.boxplot(data, vert=False)
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        plt.title('Horizontal Box Plot', fontsize=15)
+        plt.boxplot(data, vert=False)
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}Outlier 마커 심볼과 컬러 변경")
-        with st.echo():
-            outlier_marker = dict(markerfacecolor='r', marker='D')
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''outlier_marker = dict(markerfacecolor='r', marker='D')'''
+        st.code(code, language='python', line_numbers=True)
+        code = '''
+plt.title('Changed Outlier Symbols', fontsize=15)
+plt.boxplot(data, flierprops=outlier_marker)
 
-            plt.title('Changed Outlier Symbols', fontsize=15)
-            plt.boxplot(data, flierprops=outlier_marker)
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        outlier_marker = dict(markerfacecolor='r', marker='D')
+        plt.title('Changed Outlier Symbols', fontsize=15)
+        plt.boxplot(data, flierprops=outlier_marker)
         st.pyplot(plt)
         plt.close()
+        st.divider()
 
-    elif path == ("Matplotlib 기초", "Matplotlib 그래프"):
         st.header(f"{idx.getHeadIdx()}컬러맵 그리기")
         st.write("**matplotlib.pyplot** 모듈은 컬러맵을 간편하게 설정하기 위한 여러 함수를 제공합니다.")
         st.write("아래의 함수들을 사용해서 그래프의 컬러맵을 설정하는 방식에 대해 소개합니다.")
         st.write("**autumn(), bone(), cool(), copper(), flag(), gray(), hot(), hsv(), inferno(), jet(), magma(), nipy_spectral(), pink(), plasma(), prism(), spring(), summer(), viridis(), winter().**")
         st.subheader(f"{idx.getSubIdx()}기본 사용")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+np.random.seed(0)
+arr = np.random.standard_normal((8, 100))
 
-            np.random.seed(0)
-            arr = np.random.standard_normal((8, 100))
+plt.subplot(2, 2, 1)
+# plt.scatter(arr[0], arr[1], c=arr[1], cmap='spring')
+plt.scatter(arr[0], arr[1], c=arr[1])
+plt.spring()
+plt.title('spring')
 
-            plt.subplot(2, 2, 1)
-            # plt.scatter(arr[0], arr[1], c=arr[1], cmap='spring')
-            plt.scatter(arr[0], arr[1], c=arr[1])
-            plt.spring()
-            plt.title('spring')
+plt.subplot(2, 2, 2)
+plt.scatter(arr[2], arr[3], c=arr[3])
+plt.summer()
+plt.title('summer')
 
-            plt.subplot(2, 2, 2)
-            plt.scatter(arr[2], arr[3], c=arr[3])
-            plt.summer()
-            plt.title('summer')
+plt.subplot(2, 2, 3)
+plt.scatter(arr[4], arr[5], c=arr[5])
+plt.autumn()
+plt.title('autumn')
 
-            plt.subplot(2, 2, 3)
-            plt.scatter(arr[4], arr[5], c=arr[5])
-            plt.autumn()
-            plt.title('autumn')
+plt.subplot(2, 2, 4)
+plt.scatter(arr[6], arr[7], c=arr[7])
+plt.winter()
+plt.title('winter')
 
-            plt.subplot(2, 2, 4)
-            plt.scatter(arr[6], arr[7], c=arr[7])
-            plt.winter()
-            plt.title('winter')
-
-            plt.tight_layout()
-            plt.show()
-
+plt.tight_layout()
+plt.show()
+'''
+        st.code(code, language='python', line_numbers=True)
+        np.random.seed(0)
+        arr = np.random.standard_normal((8, 100))
+        plt.subplot(2, 2, 1)
+        plt.scatter(arr[0], arr[1], c=arr[1])
+        plt.spring()
+        plt.title('spring')
+        plt.subplot(2, 2, 2)
+        plt.scatter(arr[2], arr[3], c=arr[3])
+        plt.summer()
+        plt.title('summer')
+        plt.subplot(2, 2, 3)
+        plt.scatter(arr[4], arr[5], c=arr[5])
+        plt.autumn()
+        plt.title('autumn')
+        plt.subplot(2, 2, 4)
+        plt.scatter(arr[6], arr[7], c=arr[7])
+        plt.winter()
+        plt.title('winter')
+        plt.tight_layout()
         st.write("**subplot()** 함수를 이용해서 네 영역에 각각의 그래프를 나타내고,")
         st.write("**spring(), summer(), autumn(), winter()** 함수를 이용해서 컬러맵을 다르게 설정했습니다.")
         st.pyplot(plt)
@@ -4227,170 +4665,219 @@ y'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}컬러바 나타내기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+np.random.seed(0)
+arr = np.random.standard_normal((8, 100))
 
-            np.random.seed(0)
-            arr = np.random.standard_normal((8, 100))
+plt.subplot(2, 2, 1)
+plt.scatter(arr[0], arr[1], c=arr[1])
+plt.viridis()
+plt.title('viridis')
+plt.colorbar()
 
-            plt.subplot(2, 2, 1)
-            plt.scatter(arr[0], arr[1], c=arr[1])
-            plt.viridis()
-            plt.title('viridis')
-            plt.colorbar()
+plt.subplot(2, 2, 2)
+plt.scatter(arr[2], arr[3], c=arr[3])
+plt.plasma()
+plt.title('plasma')
+plt.colorbar()
 
-            plt.subplot(2, 2, 2)
-            plt.scatter(arr[2], arr[3], c=arr[3])
-            plt.plasma()
-            plt.title('plasma')
-            plt.colorbar()
+plt.subplot(2, 2, 3)
+plt.scatter(arr[4], arr[5], c=arr[5])
+plt.jet()
+plt.title('jet')
+plt.colorbar()
 
-            plt.subplot(2, 2, 3)
-            plt.scatter(arr[4], arr[5], c=arr[5])
-            plt.jet()
-            plt.title('jet')
-            plt.colorbar()
+plt.subplot(2, 2, 4)
+plt.scatter(arr[6], arr[7], c=arr[7])
+plt.nipy_spectral()
+plt.title('nipy_spectral')
+plt.colorbar()
 
-            plt.subplot(2, 2, 4)
-            plt.scatter(arr[6], arr[7], c=arr[7])
-            plt.nipy_spectral()
-            plt.title('nipy_spectral')
-            plt.colorbar()
-
-            plt.tight_layout()
-            plt.show()
+plt.tight_layout()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        np.random.seed(0)
+        arr = np.random.standard_normal((8, 100))
+        plt.subplot(2, 2, 1)
+        plt.scatter(arr[0], arr[1], c=arr[1])
+        plt.viridis()
+        plt.title('viridis')
+        plt.colorbar()
+        plt.subplot(2, 2, 2)
+        plt.scatter(arr[2], arr[3], c=arr[3])
+        plt.plasma()
+        plt.title('plasma')
+        plt.colorbar()
+        plt.subplot(2, 2, 3)
+        plt.scatter(arr[4], arr[5], c=arr[5])
+        plt.jet()
+        plt.title('jet')
+        plt.colorbar()
+        plt.subplot(2, 2, 4)
+        plt.scatter(arr[6], arr[7], c=arr[7])
+        plt.nipy_spectral()
+        plt.title('nipy_spectral')
+        plt.colorbar()
+        plt.tight_layout()
         st.write("colorbar() 함수를 사용하면 그래프 영역에 컬러바를 포함할 수 있습니다.")
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}컬러맵 종류")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            from matplotlib import cm
+        code = '''
+import matplotlib.pyplot as plt
+from matplotlib import cm
 
-            cmaps = plt.colormaps()
-            for cm in cmaps:
-                print(cm)
+cmaps = plt.colormaps()
+for cm in cmaps:
+    print(cm)'''
+        st.code(code, language='python', line_numbers=True)
         st.write("pyplot 모듈의 **colormaps()** 함수를 사용해서 Matplotlib에서 사용할 수 있는 모든 컬러맵의 이름을 얻을 수 있습니다.")
         st.write("예를 들어, **winter** 와 **winter_r** 은 순서가 앞뒤로 뒤집어진 컬러맵입니다.")
 
-        
     elif path == ("Matplotlib 기초", "막대 그래프"):
+        import matplotlib.pyplot as plt
+        import numpy as np
         st.header(f"{idx.getHeadIdx()}막대 그래프 그리기")
         st.write("**막대 그래프 (Bar graph, Bar chart)** 는 범주가 있는 데이터 값을 직사각형의 막대로 표현하는 그래프입니다.")
         st.write("Matplotlib에서는 **matplotlib.pyplot** 모듈의 **bar()** 함수를 이용해서 막대 그래프를 간단하게 표현할 수 있습니다.")
         st.subheader(f"{idx.getSubIdx()}기본 사용")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+import matplotlib.pyplot as plt
+import numpy as np
 
-            x = np.arange(3)
-            years = ['2018', '2019', '2020']
-            values = [100, 400, 900]
+x = np.arange(3)
+years = ['2018', '2019', '2020']
+values = [100, 400, 900]
 
-            plt.bar(x, values)
-            plt.xticks(x, years)
+plt.bar(x, values)
+plt.xticks(x, years)
 
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        x = np.arange(3)
+        years = ['2018', '2019', '2020']
+        values = [100, 400, 900]
+        plt.bar(x, values)
+        plt.xticks(x, years)
         st.write("이 예제는 연도별로 변화하는 값을 갖는 데이터를 막대 그래프로 나타냅니다.")
         st.write("NumPy의 **np.arange()** 함수는 주어진 범위와 간격에 따라 균일한 값을 갖는 어레이를 반환합니다.")
         st.write("**years** 는 X축에 표시될 연도이고, **values** 는 막대 그래프의 y 값 입니다.")
         st.write("먼저 **plt.bar()** 함수에 x 값 [0, 1, 2]와 y 값 [100, 400, 900]를 입력해주고,")
-        st.write("**xticks()**에 **x** 와 **years** 를 입력해주면, X축의 눈금 레이블에 ‘2018’, ‘2019’, ‘2020’이 순서대로 표시됩니다.")
+        st.write("**xticks()** 에 **x** 와 **years** 를 입력해주면, X축의 눈금 레이블에 ‘2018’, ‘2019’, ‘2020’이 순서대로 표시됩니다.")
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}비교 그래프 그리기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+x_label = ['Math', 'Programming', 'Data Science', 'Art', 'English', 'Physics']
+x = np.arange(len(x_label))
+y_1 = [66, 80, 60, 50, 80, 10]
+y_2 = [55, 90, 40, 60, 70, 20]
 
-            x_label = ['Math', 'Programming', 'Data Science', 'Art', 'English', 'Physics']
-            x = np.arange(len(x_label))
-            y_1 = [66, 80, 60, 50, 80, 10]
-            y_2 = [55, 90, 40, 60, 70, 20]
+# 넓이 지정
+width = 0.35
 
-            # 넓이 지정
-            width = 0.35
+# subplots 생성
+fig, axes = plt.subplots()
 
-            # subplots 생성
-            fig, axes = plt.subplots()
+# 넓이 설정
+axes.bar(x - width/2, y_1, width, align='center', alpha=0.5)
+axes.bar(x + width/2, y_2, width, align='center', alpha=0.8)
 
-            # 넓이 설정
-            axes.bar(x - width/2, y_1, width, align='center', alpha=0.5)
-            axes.bar(x + width/2, y_2, width, align='center', alpha=0.8)
+# xtick 설정
+plt.xticks(x)
+axes.set_xticklabels(x_label)
+plt.ylabel('Number of Students')
+plt.title('Subjects')
 
-            # xtick 설정
-            plt.xticks(x)
-            axes.set_xticklabels(x_label)
-            plt.ylabel('Number of Students')
-            plt.title('Subjects')
+plt.legend(['john', 'peter'])
 
-            plt.legend(['john', 'peter'])
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        x_label = ['Math', 'Programming', 'Data Science', 'Art', 'English', 'Physics']
+        x = np.arange(len(x_label))
+        y_1 = [66, 80, 60, 50, 80, 10]
+        y_2 = [55, 90, 40, 60, 70, 20]
+        width = 0.35
+        fig, axes = plt.subplots()
+        axes.bar(x - width/2, y_1, width, align='center', alpha=0.5)
+        axes.bar(x + width/2, y_2, width, align='center', alpha=0.8)
+        plt.xticks(x)
+        axes.set_xticklabels(x_label)
+        plt.ylabel('Number of Students')
+        plt.title('Subjects')
+        plt.legend(['john', 'peter'])
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}색상 지정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+x = np.arange(3)
+years = ['2018', '2019', '2020']
+values = [100, 400, 900]
 
-            x = np.arange(3)
-            years = ['2018', '2019', '2020']
-            values = [100, 400, 900]
+plt.bar(x, values, color='y')
+# plt.bar(x, values, color='dodgerblue')
+# plt.bar(x, values, color='C2')
+# plt.bar(x, values, color='#e35f62')
+plt.xticks(x, years)
 
-            plt.bar(x, values, color='y')
-            # plt.bar(x, values, color='dodgerblue')
-            # plt.bar(x, values, color='C2')
-            # plt.bar(x, values, color='#e35f62')
-            plt.xticks(x, years)
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        x = np.arange(3)
+        years = ['2018', '2019', '2020']
+        values = [100, 400, 900]
+        plt.bar(x, values, color='y')
+        plt.xticks(x, years)
         st.write("plt.bar() 함수의 **color** 파라미터를 사용해서 막대의 색상을 지정할 수 있습니다.")
         st.write("예제에서는 네 가지의 색상을 사용했습니다.")
         st.pyplot(plt)
         plt.close()
+        code = '''
+x = np.arange(3)
+years = ['2018', '2019', '2020']
+values = [100, 400, 900]
+colors = ['y', 'dodgerblue', 'C2']
 
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+plt.bar(x, values, color=colors)
+plt.xticks(x, years)
 
-            x = np.arange(3)
-            years = ['2018', '2019', '2020']
-            values = [100, 400, 900]
-            colors = ['y', 'dodgerblue', 'C2']
-
-            plt.bar(x, values, color=colors)
-            plt.xticks(x, years)
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        x = np.arange(3)
+        years = ['2018', '2019', '2020']
+        values = [100, 400, 900]
+        colors = ['y', 'dodgerblue', 'C2']
+        plt.bar(x, values, color=colors)
+        plt.xticks(x, years)
         st.write("**plt.bar()** 함수의 **color** 파라미터에 색상의 이름을 리스트의 형태로 입력하면, 막대의 색상을 각각 다르게 지정할 수 있습니다.")
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}막대 폭 지정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+x = np.arange(3)
+years = ['2018', '2019', '2020']
+values = [100, 400, 900]
 
-            x = np.arange(3)
-            years = ['2018', '2019', '2020']
-            values = [100, 400, 900]
+plt.bar(x, values, width=0.4)
+# plt.bar(x, values, width=0.6)
+# plt.bar(x, values, width=0.8)
+# plt.bar(x, values, width=1.0)
+plt.xticks(x, years)
 
-            plt.bar(x, values, width=0.4)
-            # plt.bar(x, values, width=0.6)
-            # plt.bar(x, values, width=0.8)
-            # plt.bar(x, values, width=1.0)
-            plt.xticks(x, years)
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        x = np.arange(3)
+        years = ['2018', '2019', '2020']
+        values = [100, 400, 900]
+        plt.bar(x, values, width=0.4)
+        plt.xticks(x, years)
         st.write("**plt.bar()** 함수의 **width** 파라미터는 막대의 폭을 지정합니다.")
         st.write("예제에서는 막대의 폭을 0.4/0.6/0.8/1.0으로 지정했고, 디폴트는 0.8입니다.")
         st.write("아래 결과는 막대 폭 0.4에 대한 결과입니다.")
@@ -4399,41 +4886,48 @@ y'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}스타일 꾸미기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+x = np.arange(3)
+years = ['2018', '2019', '2020']
+values = [100, 400, 900]
 
-            x = np.arange(3)
-            years = ['2018', '2019', '2020']
-            values = [100, 400, 900]
+plt.bar(x, values, align='edge', edgecolor='lightgray',
+        linewidth=5, tick_label=years)
 
-            plt.bar(x, values, align='edge', edgecolor='lightgray',
-                    linewidth=5, tick_label=years)
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        x = np.arange(3)
+        years = ['2018', '2019', '2020']
+        values = [100, 400, 900]
+        plt.bar(x, values, align='edge', edgecolor='lightgray',
+                linewidth=5, tick_label=years)
         st.write("이번에는 막대 그래프의 테두리의 색, 두께 등 스타일을 적용해 보겠습니다.")
         st.write("**align** 은 눈금과 막대의 위치를 조절합니다. 디폴트 값은 ‘center’이며, ‘edge’로 설정하면 막대의 왼쪽 끝에 눈금이 표시됩니다.")
         st.write("**edgecolor** 는 막대 테두리 색, **linewidth** 는 테두리의 두께를 지정합니다.")
         st.write("**tick_label** 을 리스트 또는 어레이 형태로 지정하면, 틱에 문자열을 순서대로 나타낼 수 있습니다.")
         st.pyplot(plt)
         plt.close()
+        st.divider()
 
-        st.header(f"{idx.getHeadIdx()}수막대 그래프 그리기")
+        st.header(f"{idx.getHeadIdx()}수평막대 그래프 그리기")
         st.write("**수평 막대 그래프 (Horizontal bar graph)** 는 범주가 있는 데이터 값을 수평 막대로 표현하는 그래프입니다.")
         st.write("**matplotlib.pyplot** 모듈의 **barh()** 함수를 사용해서 수평 막대 그래프를 그리는 방법을 소개합니다.")
         st.subheader(f"{idx.getSubIdx()}기본 사용")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+y = np.arange(3)
+years = ['2018', '2019', '2020']
+values = [100, 400, 900]
 
-            y = np.arange(3)
-            years = ['2018', '2019', '2020']
-            values = [100, 400, 900]
+plt.barh(y, values)
+plt.yticks(y, years)
 
-            plt.barh(y, values)
-            plt.yticks(y, years)
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        y = np.arange(3)
+        years = ['2018', '2019', '2020']
+        values = [100, 400, 900]
+        plt.barh(y, values)
+        plt.yticks(y, years)
         st.write("연도별로 변화하는 값을 갖는 데이터를 수평 막대 그래프로 나타냈습니다.")
         st.write("**years** 는 Y축에 표시될 연도이고, **values** 는 막대 그래프의 너비로 표시될 x 값 입니다.")
         st.write("먼저 **barh()** 함수에 NumPy 어레이 [0, 1, 2]와 x 값에 해당하는 리스트 [100, 400, 900]를 입력해줍니다.")
@@ -4443,54 +4937,68 @@ y'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}비교 그래프 그리기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+x_label = ['Math', 'Programming', 'Data Science', 'Art', 'English', 'Physics']
+x = np.arange(len(x_label))
+y_1 = [66, 80, 60, 50, 80, 10]
+y_2 = [55, 90, 40, 60, 70, 20]
 
-            x_label = ['Math', 'Programming', 'Data Science', 'Art', 'English', 'Physics']
-            x = np.arange(len(x_label))
-            y_1 = [66, 80, 60, 50, 80, 10]
-            y_2 = [55, 90, 40, 60, 70, 20]
+# 넓이 지정
+width = 0.35
 
-            # 넓이 지정
-            width = 0.35
+# subplots 생성
+fig, axes = plt.subplots()
 
-            # subplots 생성
-            fig, axes = plt.subplots()
+# 넓이 설정
+axes.barh(x - width/2, y_1, width, align='center', alpha=0.5, color='green')
+axes.barh(x + width/2, y_2, width, align='center', alpha=0.8, color='red')
 
-            # 넓이 설정
-            axes.barh(x - width/2, y_1, width, align='center', alpha=0.5, color='green')
-            axes.barh(x + width/2, y_2, width, align='center', alpha=0.8, color='red')
+# xtick 설정
+plt.yticks(x)
+axes.set_yticklabels(x_label)
+plt.xlabel('Number of Students')
+plt.title('Subjects')
 
-            # xtick 설정
-            plt.yticks(x)
-            axes.set_yticklabels(x_label)
-            plt.xlabel('Number of Students')
-            plt.title('Subjects')
+plt.legend(['john', 'peter'])
 
-            plt.legend(['john', 'peter'])
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        x_label = ['Math', 'Programming', 'Data Science', 'Art', 'English', 'Physics']
+        x = np.arange(len(x_label))
+        y_1 = [66, 80, 60, 50, 80, 10]
+        y_2 = [55, 90, 40, 60, 70, 20]
+        width = 0.35
+        fig, axes = plt.subplots()
+        axes.barh(x - width/2, y_1, width, align='center', alpha=0.5, color='green')
+        axes.barh(x + width/2, y_2, width, align='center', alpha=0.8, color='red')
+        plt.yticks(x)
+        axes.set_yticklabels(x_label)
+        plt.xlabel('Number of Students')
+        plt.title('Subjects')
+        plt.legend(['john', 'peter'])
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}막대 높이 지정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+y = np.arange(3)
+years = ['2018', '2019', '2020']
+values = [100, 400, 900]
 
-            y = np.arange(3)
-            years = ['2018', '2019', '2020']
-            values = [100, 400, 900]
+plt.barh(y, values, height=0.4)
+# plt.barh(y, values, height=0.6)
+# plt.barh(y, values, height=0.8)
+# plt.barh(y, values, height=1.0)
+plt.yticks(y, years)
 
-            plt.barh(y, values, height=0.4)
-            # plt.barh(y, values, height=0.6)
-            # plt.barh(y, values, height=0.8)
-            # plt.barh(y, values, height=1.0)
-            plt.yticks(y, years)
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        y = np.arange(3)
+        years = ['2018', '2019', '2020']
+        values = [100, 400, 900]
+        plt.barh(y, values, height=0.4)
+        plt.yticks(y, years)
         st.write("plt.barh() 함수의 height 파라미터는 막대의 높이를 지정합니다.")
         st.write("예제에서는 막대의 높이를 0.4/0.6/0.8/1.0으로 지정했고, 디폴트는 0.8입니다.")
         st.write("아래 결과는 막대 높이 0.4에 대한 결과입니다.")
@@ -4500,35 +5008,42 @@ y'''
 
         st.subheader(f"{idx.getSubIdx()}Barplot(축 변환)")
         st.write("barch 함수에서는 **xticks로 설정**했던 부분을 **yticks로 변경**합니다.")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+x = ['Math', 'Programming', 'Data Science', 'Art', 'English', 'Physics']
+y = [66, 80, 60, 50, 80, 10]
 
-            x = ['Math', 'Programming', 'Data Science', 'Art', 'English', 'Physics']
-            y = [66, 80, 60, 50, 80, 10]
+plt.barh(x, y, align='center', alpha=0.7, color='green')
+plt.yticks(x)
+plt.xlabel('Number of Students')
+plt.title('Subjects')
 
-            plt.barh(x, y, align='center', alpha=0.7, color='green')
-            plt.yticks(x)
-            plt.xlabel('Number of Students')
-            plt.title('Subjects')
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        x = ['Math', 'Programming', 'Data Science', 'Art', 'English', 'Physics']
+        y = [66, 80, 60, 50, 80, 10]
+        plt.barh(x, y, align='center', alpha=0.7, color='green')
+        plt.yticks(x)
+        plt.xlabel('Number of Students')
+        plt.title('Subjects')
         st.pyplot(plt)
         plt.close()
-    
+        st.divider()
 
         st.header(f"{idx.getHeadIdx()}Histogram")
         st.write("**히스토그램 (Histogram)은 도수분포표를 그래프로 나타낸 것으로서, 가로축은 계급, 세로축은 도수 (횟수나 개수 등)** 를 나타냅니다.")
         st.write("이번에는 **matplotlib.pyplot** 모듈의 **hist()** 함수를 이용해서 다양한 히스토그램을 그려 보겠습니다.")
         st.subheader(f"{idx.getSubIdx()}기본 사용")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+weight = [68, 81, 64, 56, 78, 74, 61, 77, 66, 68, 59, 71,
+        80, 59, 67, 81, 69, 73, 69, 74, 70, 65]
 
-            weight = [68, 81, 64, 56, 78, 74, 61, 77, 66, 68, 59, 71,
-                    80, 59, 67, 81, 69, 73, 69, 74, 70, 65]
+plt.hist(weight)
 
-            plt.hist(weight)
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        weight = [68, 81, 64, 56, 78, 74, 61, 77, 66, 68, 59, 71,
+                80, 59, 67, 81, 69, 73, 69, 74, 70, 65]
+        plt.hist(weight)
         st.write("weight는 몸무게 값을 나타내는 리스트입니다.")
         st.write("**hist()** 함수에 리스트의 형태로 값들을 직접 입력해주면 됩니다.")
         st.pyplot(plt)
@@ -4538,42 +5053,55 @@ y'''
         st.subheader(f"{idx.getSubIdx()}구간 개수 지정하기")
         st.write("**hist()** 함수의 **bins** 파라미터는 히스토그램의 가로축 구간의 개수를 지정합니다.")
         st.write("아래 그림과 같이 구간의 개수에 따라 히스토그램 분포의 형태가 달라질 수 있기 때문에 적절한 구간의 개수를 지정해야 합니다.")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+N = 100000
+bins = 30
 
-            N = 100000
-            bins = 30
+x = np.random.randn(N)
 
-            x = np.random.randn(N)
+fig, axs = plt.subplots(1, 3, 
+                        sharey=True, 
+                        tight_layout=True
+                    )
 
-            fig, axs = plt.subplots(1, 3, 
-                                    sharey=True, 
-                                    tight_layout=True
-                                )
+fig.set_size_inches(12, 5)
 
-            fig.set_size_inches(12, 5)
+axs[0].hist(x, bins=bins)
+axs[1].hist(x, bins=bins*2)
+axs[2].hist(x, bins=bins*4)
 
-            axs[0].hist(x, bins=bins)
-            axs[1].hist(x, bins=bins*2)
-            axs[2].hist(x, bins=bins*4)
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        N = 100000
+        bins = 30
+        x = np.random.randn(N)
+        fig, axs = plt.subplots(1, 3, 
+                                sharey=True, 
+                                tight_layout=True
+                            )
+        fig.set_size_inches(12, 5)
+        axs[0].hist(x, bins=bins)
+        axs[1].hist(x, bins=bins*2)
+        axs[2].hist(x, bins=bins*4)
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}누적 히스토그램 그리기")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+weight = [68, 81, 64, 56, 78, 74, 61, 77, 66, 68, 59, 71,
+        80, 59, 67, 81, 69, 73, 69, 74, 70, 65]
 
-            weight = [68, 81, 64, 56, 78, 74, 61, 77, 66, 68, 59, 71,
-                    80, 59, 67, 81, 69, 73, 69, 74, 70, 65]
+plt.hist(weight, cumulative=True, label='cumulative=True')
+plt.hist(weight, cumulative=False, label='cumulative=False')
+plt.legend(loc='upper left')
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        weight = [68, 81, 64, 56, 78, 74, 61, 77, 66, 68, 59, 71, 80, 59, 67, 81, 69, 73, 69, 74, 70, 65]
 
-            plt.hist(weight, cumulative=True, label='cumulative=True')
-            plt.hist(weight, cumulative=False, label='cumulative=False')
-            plt.legend(loc='upper left')
-            plt.show()
+        plt.hist(weight, cumulative=True, label='cumulative=True')
+        plt.hist(weight, cumulative=False, label='cumulative=False')
+        plt.legend(loc='upper left')
         st.write("**cumulative** 파라미터를 **True**로 지정하면 누적 히스토그램을 나타냅니다.")
         st.write("디폴트는 **False**로 지정됩니다.")
         st.pyplot(plt)
@@ -4581,50 +5109,72 @@ y'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}히스토그램 종류 지정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+weight = [68, 81, 64, 56, 78, 74, 61, 77, 66, 68, 59, 71,
+        80, 59, 67, 81, 69, 73, 69, 74, 70, 65]
+weight2 = [52, 67, 84, 66, 58, 78, 71, 57, 76, 62, 51, 79,
+        69, 64, 76, 57, 63, 53, 79, 64, 50, 61]
 
-            weight = [68, 81, 64, 56, 78, 74, 61, 77, 66, 68, 59, 71,
-                    80, 59, 67, 81, 69, 73, 69, 74, 70, 65]
-            weight2 = [52, 67, 84, 66, 58, 78, 71, 57, 76, 62, 51, 79,
-                    69, 64, 76, 57, 63, 53, 79, 64, 50, 61]
+plt.hist((weight, weight2), histtype='bar')
+plt.title('histtype - bar')
+plt.figure()
 
-            plt.hist((weight, weight2), histtype='bar')
-            plt.title('histtype - bar')
-            plt.figure()
+plt.hist((weight, weight2), histtype='barstacked')
+plt.title('histtype - barstacked')
+plt.figure()
 
-            plt.hist((weight, weight2), histtype='barstacked')
-            plt.title('histtype - barstacked')
-            plt.figure()
+plt.hist((weight, weight2), histtype='stepfilled')
+plt.title('histtype - stepfilled')
+plt.figure()
 
-            plt.hist((weight, weight2), histtype='stepfilled')
-            plt.title('histtype - stepfilled')
-            plt.figure()
-
-            plt.hist((weight, weight2), histtype='step')
-            plt.title('histtype - step')
-            plt.show()
+plt.hist((weight, weight2), histtype='step')
+plt.title('histtype - step')
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
         st.write("**histtype** 은 히스토그램의 종류를 지정합니다.")
         st.write("{‘bar’, ‘barstacked’, ‘stepfilled’, ‘step’} 중에서 선택할 수 있으며, 디폴트는 ‘bar’입니다.")
         st.write("예제에서와 같이 두 종류의 데이터를 히스토그램으로 나타냈을 때, **histtype** 의 값에 따라 각기 다른 히스토그램이 그려집니다.")
+        weight = [68, 81, 64, 56, 78, 74, 61, 77, 66, 68, 59, 71, 80, 59, 67, 81, 69, 73, 69, 74, 70, 65]
+        weight2 = [52, 67, 84, 66, 58, 78, 71, 57, 76, 62, 51, 79, 69, 64, 76, 57, 63, 53, 79, 64, 50, 61]
+        plt.hist((weight, weight2), histtype='bar')
+        plt.title('histtype - bar')
+        st.pyplot(plt)
+        plt.clf()
+        plt.figure()
+        plt.hist((weight, weight2), histtype='barstacked')
+        plt.title('histtype - barstacked')
+        st.pyplot(plt)
+        plt.clf()
+        plt.figure()
+        plt.hist((weight, weight2), histtype='stepfilled')
+        plt.title('histtype - stepfilled')
+        st.pyplot(plt)
+        plt.clf()
+        plt.figure()
+        plt.hist((weight, weight2), histtype='step')
+        plt.title('histtype - step')
         st.pyplot(plt)
         plt.clf()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}NumPy 난수의 분포 나타내기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+a = 2.0 * np.random.randn(10000) + 1.0
+b = np.random.standard_normal(10000)
+c = 20.0 * np.random.rand(5000) - 10.0
 
-            a = 2.0 * np.random.randn(10000) + 1.0
-            b = np.random.standard_normal(10000)
-            c = 20.0 * np.random.rand(5000) - 10.0
+plt.hist(a, bins=100, density=True, alpha=0.7, histtype='step')
+plt.hist(b, bins=50, density=True, alpha=0.5, histtype='stepfilled')
+plt.hist(c, bins=100, density=True, alpha=0.9, histtype='step')
 
-            plt.hist(a, bins=100, density=True, alpha=0.7, histtype='step')
-            plt.hist(b, bins=50, density=True, alpha=0.5, histtype='stepfilled')
-            plt.hist(c, bins=100, density=True, alpha=0.9, histtype='step')
-
-            plt.show()
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        a = 2.0 * np.random.randn(10000) + 1.0
+        b = np.random.standard_normal(10000)
+        c = 20.0 * np.random.rand(5000) - 10.0
+        plt.hist(a, bins=100, density=True, alpha=0.7, histtype='step')
+        plt.hist(b, bins=50, density=True, alpha=0.5, histtype='stepfilled')
+        plt.hist(c, bins=100, density=True, alpha=0.9, histtype='step')
         st.write("Numpy의 np.random.randn(), np.random.standard_normal(), np.random.rand() 함수를 이용해서 임의의 값들을 만들었습니다.")
         st.write("어레이 a는 표준편차 2.0, 평균 1.0을 갖는 정규분포, 어레이 b는 표준정규분포를 따릅니다.")
         st.write("어레이 c는 -10.0에서 10.0 사이의 균일한 분포를 갖는 5000개의 임의의 값입니다.")
@@ -4633,28 +5183,34 @@ y'''
         st.pyplot(plt)
         plt.close()
 
-    elif path == ("Matplotlib 기초", "이외?") :
+    elif path == ("Matplotlib 기초", "Pie chart, 3D plot") :
+        import matplotlib.pyplot as plt
+        import numpy as np
+        from mpl_toolkits import mplot3d
         st.header(f"{idx.getHeadIdx()}Pie Chart")
         st.write("**파이 차트 (Pie chart, 원 그래프)** 는 범주별 구성 비율을 원형으로 표현한 그래프입니다.")
         st.write("위의 그림과 같이 **부채꼴의 중심각을 구성 비율에 비례** 하도록 표현합니다.")
         st.write("**matplotlib.pyplot** 모듈의 **pie()** 함수를 이용해서 파이 차트를 그리는 방법에 대해 소개합니다.")
 
         st.subheader(f"{idx.getSubIdx()}pie chart 옵션")
-        st.write("◾ explode : 파이에서 툭 튀어져 나온 비율")
-        st.write("◾ autopct : 퍼센트 자동으로 표기")
-        st.write("◾ shadow : 그림자 표시")
-        st.write("◾ startangle : 파이를 그리기 시작할 각도")
+        st.write("- explode : 파이에서 툭 튀어져 나온 비율")
+        st.write("- autopct : 퍼센트 자동으로 표기")
+        st.write("- shadow : 그림자 표시")
+        st.write("- startangle : 파이를 그리기 시작할 각도")
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}기본 사용")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+ratio = [34, 32, 16, 18]
+labels = ['Apple', 'Banana', 'Melon', 'Grapes']
 
-            ratio = [34, 32, 16, 18]
-            labels = ['Apple', 'Banana', 'Melon', 'Grapes']
+plt.pie(ratio, labels=labels, autopct='%.1f%%')
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        ratio = [34, 32, 16, 18]
+        labels = ['Apple', 'Banana', 'Melon', 'Grapes']
 
-            plt.pie(ratio, labels=labels, autopct='%.1f%%')
-            plt.show()
+        plt.pie(ratio, labels=labels, autopct='%.1f%%')
         st.write("우선 각 영역의 비율과 이름을 **ratio** 와 **labels** 로 지정해주고, **pie()** 함수에 순서대로 입력합니다.")
         st.write("**autopct** 는 부채꼴 안에 표시될 숫자의 형식을 지정합니다. 소수점 한자리까지 표시하도록 설정했습니다.")
         st.pyplot(plt)
@@ -4662,14 +5218,17 @@ y'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}시작 각도와 방향 설정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+ratio = [34, 32, 16, 18]
+labels = ['Apple', 'Banana', 'Melon', 'Grapes']
 
-            ratio = [34, 32, 16, 18]
-            labels = ['Apple', 'Banana', 'Melon', 'Grapes']
+plt.pie(ratio, labels=labels, autopct='%.1f%%', startangle=260, counterclock=False)
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        ratio = [34, 32, 16, 18]
+        labels = ['Apple', 'Banana', 'Melon', 'Grapes']
 
-            plt.pie(ratio, labels=labels, autopct='%.1f%%', startangle=260, counterclock=False)
-            plt.show()
+        plt.pie(ratio, labels=labels, autopct='%.1f%%', startangle=260, counterclock=False)
         st.write("**startangle** 는 부채꼴이 그려지는 시작 각도를 설정합니다.")
         st.write("디폴트는 0도 (양의 방향 x축)로 설정되어 있습니다.")
         st.write("**counterclock=False** 로 설정하면 시계 방향 순서로 부채꼴 영역이 표시됩니다.")
@@ -4678,15 +5237,18 @@ y'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}중심에서 벗어나는 정도 설정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+ratio = [34, 32, 16, 18]
+labels = ['Apple', 'Banana', 'Melon', 'Grapes']
+explode = [0, 0.10, 0, 0.10]
 
-            ratio = [34, 32, 16, 18]
-            labels = ['Apple', 'Banana', 'Melon', 'Grapes']
-            explode = [0, 0.10, 0, 0.10]
-
-            plt.pie(ratio, labels=labels, autopct='%.1f%%', startangle=260, counterclock=False, explode=explode)
-            plt.show()
+plt.pie(ratio, labels=labels, autopct='%.1f%%', startangle=260, counterclock=False, explode=explode)
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        ratio = [34, 32, 16, 18]
+        labels = ['Apple', 'Banana', 'Melon', 'Grapes']
+        explode = [0, 0.10, 0, 0.10]
+        plt.pie(ratio, labels=labels, autopct='%.1f%%', startangle=260, counterclock=False, explode=explode)
         st.write("**explode** 는 부채꼴이 파이 차트의 중심에서 벗어나는 정도를 설정합니다.")
         st.write("‘Banana’와 ‘Grapes’ 영역에 대해서 반지름의 10% 만큼 벗어나도록 설정했습니다.")
         st.pyplot(plt)
@@ -4694,31 +5256,40 @@ y'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}그림자 나타내기")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+ratio = [34, 32, 16, 18]
+labels = ['Apple', 'Banana', 'Melon', 'Grapes']
+explode = [0.05, 0.05, 0.05, 0.05]
 
-            ratio = [34, 32, 16, 18]
-            labels = ['Apple', 'Banana', 'Melon', 'Grapes']
-            explode = [0.05, 0.05, 0.05, 0.05]
+plt.pie(ratio, labels=labels, autopct='%.1f%%', startangle=260, counterclock=False, explode=explode, shadow=True)
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        ratio = [34, 32, 16, 18]
+        labels = ['Apple', 'Banana', 'Melon', 'Grapes']
+        explode = [0.05, 0.05, 0.05, 0.05]
 
-            plt.pie(ratio, labels=labels, autopct='%.1f%%', startangle=260, counterclock=False, explode=explode, shadow=True)
-            plt.show()
+        plt.pie(ratio, labels=labels, autopct='%.1f%%', startangle=260, counterclock=False, explode=explode, shadow=True)
         st.write("**shadow** 를 True로 설정하면, 파이 차트에 그림자가 표시됩니다.")
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}색상 지정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+ratio = [34, 32, 16, 18]
+labels = ['Apple', 'Banana', 'Melon', 'Grapes']
+explode = [0.05, 0.05, 0.05, 0.05]
+colors = ['silver', 'gold', 'whitesmoke', 'lightgray']
 
-            ratio = [34, 32, 16, 18]
-            labels = ['Apple', 'Banana', 'Melon', 'Grapes']
-            explode = [0.05, 0.05, 0.05, 0.05]
-            colors = ['silver', 'gold', 'whitesmoke', 'lightgray']
+plt.pie(ratio, labels=labels, autopct='%.1f%%', startangle=260, counterclock=False, explode=explode, shadow=True, colors=colors)
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        ratio = [34, 32, 16, 18]
+        labels = ['Apple', 'Banana', 'Melon', 'Grapes']
+        explode = [0.05, 0.05, 0.05, 0.05]
+        colors = ['silver', 'gold', 'whitesmoke', 'lightgray']
 
-            plt.pie(ratio, labels=labels, autopct='%.1f%%', startangle=260, counterclock=False, explode=explode, shadow=True, colors=colors)
-            plt.show()
+        plt.pie(ratio, labels=labels, autopct='%.1f%%', startangle=260, counterclock=False, explode=explode, shadow=True, colors=colors)
         st.write("**colors** 를 사용하면 각 영역의 색상을 자유롭게 지정할 수 있습니다.")
         st.write("‘silver’, ‘gold’, ‘lightgray’, ‘whitesmoke’ 등 색상의 이름을 사용해서 각 영역의 색상을 지정했습니다.")
         st.pyplot(plt)
@@ -4726,107 +5297,165 @@ y'''
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}부채꼴 스타일 지정하기")
-        with st.echo():
-            import matplotlib.pyplot as plt
+        code = '''
+ratio = [34, 32, 16, 18]
+labels = ['Apple', 'Banana', 'Melon', 'Grapes']
+colors = ['#ff9999', '#ffc000', '#8fd9b6', '#d395d0']
+wedgeprops={'width': 0.7, 'edgecolor': 'w', 'linewidth': 5}
 
-            ratio = [34, 32, 16, 18]
-            labels = ['Apple', 'Banana', 'Melon', 'Grapes']
-            colors = ['#ff9999', '#ffc000', '#8fd9b6', '#d395d0']
-            wedgeprops={'width': 0.7, 'edgecolor': 'w', 'linewidth': 5}
+plt.pie(ratio, labels=labels, autopct='%.1f%%', startangle=260, counterclock=False, colors=colors, wedgeprops=wedgeprops)
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        ratio = [34, 32, 16, 18]
+        labels = ['Apple', 'Banana', 'Melon', 'Grapes']
+        colors = ['#ff9999', '#ffc000', '#8fd9b6', '#d395d0']
+        wedgeprops={'width': 0.7, 'edgecolor': 'w', 'linewidth': 5}
 
-            plt.pie(ratio, labels=labels, autopct='%.1f%%', startangle=260, counterclock=False, colors=colors, wedgeprops=wedgeprops)
-            plt.show()
+        plt.pie(ratio, labels=labels, autopct='%.1f%%', startangle=260, counterclock=False, colors=colors, wedgeprops=wedgeprops)
         st.write("**wedgeprops** 는 부채꼴 영역의 스타일을 설정합니다.")
         st.write("wedgeprops 딕셔너리의 ‘width’, ‘edgecolor’, ‘linewidth’ 키를 이용해서 각각 부채꼴 영역의 너비 (반지름에 대한 비율), 테두리의 색상, 테두리 선의 너비를 설정했습니다.")
         st.pyplot(plt)
         plt.close()
-        
+        st.divider()
         
         st.header(f"{idx.getHeadIdx()}3D 그래프")
-        st.write("3D로 그래프를 그리기 위해서는 mplot3d를 추가로 import 합니다")
-        with st.echo():
-            from mpl_toolkits import mplot3d
-
+        st.write("3D로 그래프를 그리기 위해서는 mplot3d를 추가로 import 합니다.")
+        code = '''from mpl_toolkits import mplot3d'''
+        st.code(code, language='python', line_numbers=True)
         st.subheader(f"{idx.getSubIdx()}밑그림 그리기(캔버스)")
-        with st.echo():
-            import matplotlib.pyplot as plt
-
-            fig = plt.figure()
-            ax = plt.axes(projection='3d')
+        code = '''
+fig = plt.figure()
+ax = plt.axes(projection='3d')'''
+        st.code(code, language='python', line_numbers=True)
+        fig = plt.figure()
+        ax = plt.axes(projection='3d')
         st.pyplot(plt)
         plt.close()
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}3D plot 그리기")
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+        code = '''
+import numpy as np
 
-            # project=3d로 설정합니다
-            ax = plt.axes(projection='3d')
+# project=3d로 설정합니다
+ax = plt.axes(projection='3d')
 
-            # x, y, z 데이터를 생성합니다
-            z = np.linspace(0, 15, 1000)
-            x = np.sin(z)
-            y = np.cos(z)
+# x, y, z 데이터를 생성합니다
+z = np.linspace(0, 15, 1000)
+x = np.sin(z)
+y = np.cos(z)
 
-            ax.plot3D(x, y, z, 'gray')
-            plt.show()
+ax.plot3D(x, y, z, 'gray')
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        ax = plt.axes(projection='3d')
+        z = np.linspace(0, 15, 1000)
+        x = np.sin(z)
+        y = np.cos(z)
+        ax.plot3D(x, y, z, 'gray')
         st.pyplot(plt)
         plt.close()
         st.divider()
+        st.subheader(f"{idx.getSubIdx()}3D plot에 마커 추가하기")
+        code = '''
+# project=3d로 설정합니다
+ax = plt.axes(projection='3d')
 
-        with st.echo():
-            import matplotlib.pyplot as plt
-            import numpy as np
+sample_size = 100
+x = np.cumsum(np.random.normal(0, 1, sample_size))
+y = np.cumsum(np.random.normal(0, 1, sample_size))
+z = np.cumsum(np.random.normal(0, 1, sample_size))
 
-            # project=3d로 설정합니다
-            ax = plt.axes(projection='3d')
+# marker 추가
+ax.plot3D(x, y, z, alpha=0.6, marker='o')
 
-            sample_size = 100
-            x = np.cumsum(np.random.normal(0, 1, sample_size))
-            y = np.cumsum(np.random.normal(0, 1, sample_size))
-            z = np.cumsum(np.random.normal(0, 1, sample_size))
-
-            # marker 추가
-            ax.plot3D(x, y, z, alpha=0.6, marker='o')
-
-            plt.title("ax.plot")
-            plt.show()
+plt.title("ax.plot")
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        ax = plt.axes(projection='3d')
+        sample_size = 100
+        x = np.cumsum(np.random.normal(0, 1, sample_size))
+        y = np.cumsum(np.random.normal(0, 1, sample_size))
+        z = np.cumsum(np.random.normal(0, 1, sample_size))
+        ax.plot3D(x, y, z, alpha=0.6, marker='o')
+        plt.title("ax.plot")
         st.pyplot(plt)
         plt.close()
 
+
     elif path == ("실습 프로젝트", "대기오염 데이터 분석"):
+        import numpy as np
+        import pandas as pd
+        import seaborn as sns
+        import matplotlib.pyplot as plt
         st.header(f"{idx.getHeadIdx()}서울시 종로구 대기오염")
-        st.subheader("서울시 종로구 대기오염")
         st.write("CSV 파일의 2022년 서울시 종로구 대기오염 측정정보를 사용하여 데이터 로드, 분석 및 시각화 결론도출까지 실습을 진행합니다.")
+        st.subheader(f"{idx.getSubIdx()}라이브러리 설치하기")
+        code = '''pip install numpy'''
+        st.code(code, language='python')
+        code = '''pip install pandas'''
+        st.code(code, language='python')
+        code = '''pip install seaborn'''
+        st.code(code, language='python')
+        code = '''pip install matplotlib'''
+        st.code(code, language='python')
 
         st.subheader(f"{idx.getSubIdx()}데이터 불러오기")
         st.write('- 실습을 위해 **아래의 버튼**을 클릭하여 데이터를 다운로드 해주세요')
-        
-        with open('data/서울시대기오염측정정보/Measurement_item_info.csv', "rb") as template_file:
-            template_byte = template_file.read()
+        col1, col2, col3 = st.columns(3)
 
-        st.download_button(label="download data",
-                            type="primary",
-                            data=template_byte,
-                           file_name = "Measurement_item_info.csv"
-        )
-        with st.echo():
-            # 필요한 패키지 설치
-            import numpy as np
-            import pandas as pd
-            import seaborn as sns
-            import matplotlib.pyplot as plt
+        with col1:
+            st.write("Measurement_item_info.csv")
+            with open('data/서울시대기오염측정정보/Measurement_item_info.csv', "rb") as template_file:
+                template_byte = template_file.read()
 
-            # 데이터 불러오기
-            df_summary = pd.read_csv('data/서울시대기오염측정정보/Measurement_summary.csv')
-            df_item = pd.read_csv('data/서울시대기오염측정정보/Measurement_item_info.csv')
-            df_station = pd.read_csv('data/서울시대기오염측정정보/Measurement_station_info.csv')
+            st.download_button(label="download data",
+                                type="primary",
+                                data=template_byte,
+                            file_name = "Measurement_item_info.csv"
+            )
+        with col2:
+            st.write("Measurement_station_info.csv")
+            with open('data/서울시대기오염측정정보/Measurement_station_info.csv', "rb") as template_file:
+                template_byte = template_file.read()
 
-            df_summary.head()
-            df_item.head()
-            df_station.head()
+            st.download_button(label="download data",
+                                type="primary",
+                                data=template_byte,
+                            file_name = "Measurement_station_info.csv"
+            )
+        with col3:
+            st.write("Measurement_summary.csv")
+            with open('data/서울시대기오염측정정보/Measurement_summary.csv', "rb") as template_file:
+                template_byte = template_file.read()
+
+            st.download_button(label="download data",
+                                type="primary",
+                                data=template_byte,
+                            file_name = "Measurement_summary.csv"
+            )
+        code = '''
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# 데이터 불러오기
+df_summary = pd.read_csv('data/서울시대기오염측정정보/Measurement_summary.csv')
+df_item = pd.read_csv('data/서울시대기오염측정정보/Measurement_item_info.csv')
+df_station = pd.read_csv('data/서울시대기오염측정정보/Measurement_station_info.csv')
+
+df_summary.head()
+df_item.head()
+df_station.head()'''
+        st.code(code, language='python', line_numbers=True)
+        df_summary = pd.read_csv('data/서울시대기오염측정정보/Measurement_summary.csv')
+        df_item = pd.read_csv('data/서울시대기오염측정정보/Measurement_item_info.csv')
+        df_station = pd.read_csv('data/서울시대기오염측정정보/Measurement_station_info.csv')
+
+        df_summary.head()
+        df_item.head()
+        df_station.head()
         st.write("**Measurement_summary**")
         st.write(df_summary.head())
         st.write("**Measurement_item_info**")
@@ -4835,12 +5464,13 @@ y'''
         st.write(df_station.head())
         st.divider()
 
+        st.header(f"{idx.getHeadIdx()}데이터 전처리")
         st.subheader(f"{idx.getSubIdx()}데이터 합치기")
         st.write("Measurement data를 data와 time으로 나누고, 일 평균 값으로 합칩니다.")
         code = '''# 'Measurement date' 열을 사용하여 date_time 분리
 date_time = df_summary['Measurement date'].str.split(" ", n=1, expand=True)
 date_time.head()'''
-        st.code(code, language='python')
+        st.code(code, language='python', line_numbers=True)
         date_time = df_summary['Measurement date'].str.split(" ", n=1, expand=True)
         st.write(date_time.head())
 
@@ -4852,83 +5482,88 @@ df_summary['time'] = date_time[1]
 df_summary = df_summary.drop(['Measurement date'], axis=1)
 df_summary.head()
 '''
-        st.code(code, language='python')
+        st.code(code, language='python', line_numbers=True)
 
         df_summary['date'] = date_time[0]
         df_summary['time'] = date_time[1]
         df_summary = df_summary.drop(['Measurement date'], axis=1)
         st.write(df_summary.head())
+        st.divider()
 
-
-        st.subheader(f"{idx.getSubIdx()}데이터 분석")
+        st.header(f"{idx.getHeadIdx()}데이터 분석")
+        st.subheader(f"{idx.getSubIdx()}시계열 그래프")
         st.write("먼저 서울 전체에 대해서 분석해 보기 위해서 data로 groupby하고 분석합니다.")
-        with st.echo():
-            df_seoul = df_summary.groupby(['date'], as_index=False).agg({'SO2':'mean', 'NO2':'mean', 'O3':'mean', 'CO':'mean', 'PM10':'mean', 'PM2.5':'mean'})
-            df_seoul.head()
+        code = '''
+df_seoul = df_summary.groupby(['date'], as_index=False).agg({'SO2':'mean', 'NO2':'mean', 'O3':'mean', 'CO':'mean', 'PM10':'mean', 'PM2.5':'mean'})
+df_seoul.head()'''
+        st.code(code, language='python', line_numbers=True)
         df_seoul = df_summary.groupby(['date'], as_index=False).agg({'SO2':'mean', 'NO2':'mean', 'O3':'mean', 'CO':'mean', 'PM10':'mean', 'PM2.5':'mean'})
         st.write(df_seoul.head())
-
-        with st.echo():
-            df_seoul.plot(x='date')
-            plt.show()
+        code = '''
+df_seoul.plot(x='date')
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        df_seoul.plot(x='date')
         st.pyplot(plt)
         plt.close()
 
+        st.subheader(f"{idx.getSubIdx()}히트맵")
         code = '''
-        corr = df_seoul.corr()
-        f, ax = plt.subplots(figsize=(11, 9))
+df_numeric = df_seoul.drop(columns=['date'])
+# 상관 행렬 계산
+corr = df_numeric.corr()
+# Figure 및 Axes 객체 생성
+fig, ax = plt.subplots(figsize=(11, 9))
+# 색상 맵 생성
+cmap = sns.diverging_palette(220, 10, as_cmap=True)
+# 히트맵 생성
+sns.heatmap(corr, cmap=cmap, vmax=1, center=0,
+            square=True, linewidths=.5, cbar_kws={"shrink": .5})
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        df_numeric = df_seoul.drop(columns=['date'])
+        corr = df_numeric.corr()
+        fig, ax = plt.subplots(figsize=(11, 9))
         cmap = sns.diverging_palette(220, 10, as_cmap=True)
         sns.heatmap(corr, cmap=cmap, vmax=1, center=0,
                     square=True, linewidths=.5, cbar_kws={"shrink": .5})
-        plt.show() 
-        '''
-
-        with st.echo():
-            df_numeric = df_seoul.drop(columns=['date'])
-            # 상관 행렬 계산
-            corr = df_numeric.corr()
-            # Figure 및 Axes 객체 생성
-            fig, ax = plt.subplots(figsize=(11, 9))
-            # 색상 맵 생성
-            cmap = sns.diverging_palette(220, 10, as_cmap=True)
-            # 히트맵 생성
-            sns.heatmap(corr, cmap=cmap, vmax=1, center=0,
-                        square=True, linewidths=.5, cbar_kws={"shrink": .5})
-            plt.show()
         st.pyplot(plt)
         plt.close()
         st.divider()
-        st.write("**PM10 농도**")
+        st.subheader(f"{idx.getSubIdx()}PM10 농도")
         st.write("미세먼지(PM10) 기준으로 좋음, 보통, 나쁨, 매우나쁨으로 구분")
         st.write("대한민국의 미세먼지 환경기준(일평균)")
-        st.write("◾ 좋음 0~30")
-        st.write("◾ 보통 ~80")
-        st.write("◾ 나쁨 ~150")
-        st.write("◾ 매우나쁨151~")
+        st.write("- 좋음 0~30")
+        st.write("- 보통 ~80")
+        st.write("- 나쁨 ~150")
+        st.write("- 매우나쁨151~")
         code = '''df_seoul['PM10_class'] = -1
-                    df_seoul.head()'''
-        st.code(code, language='python')
+df_seoul.head()'''
+        st.code(code, language='python', line_numbers=True)
         df_seoul['PM10_class'] = -1
         st.write(df_seoul.head())
         st.write("PM10 농도 값을 기준으로 각 행에 대해 클래스를 할당하고, 'PM10_class'라는 새로운 열에 이 값을 저장합니다.")
         st.write("PM10 농도가 특정 범위에 있는 경우에 따라 0,1,2,3 값을 가집니다.")
+        st.caption("0: 좋음, 1: 보통, 2: 나쁨, 3: 매우나쁨")
         code = '''
-                for (idx, row) in df_seoul.iterrows():
-                    pm10 = row[5]
-                    _class = -1
-                    if pm10 < 0:
-                        continue
-                    elif pm10 < 30:
-                        _class = 0
-                    elif pm10 < 80:
-                        _class = 1
-                    elif pm10 < 150:
-                        _class = 2
-                    else:
-                        _class = 3
-                    df_seoul.loc[idx, 'PM10_class'] = _class
-                df_seoul.head()
-                '''
+for (idx, row) in df_seoul.iterrows():
+    pm10 = row[5]
+    _class = -1
+    if pm10 < 0:
+        continue
+    elif pm10 < 30:
+        _class = 0
+    elif pm10 < 80:
+        _class = 1
+    elif pm10 < 150:
+        _class = 2
+    else:
+        _class = 3
+    df_seoul.loc[idx, 'PM10_class'] = _class
+df_seoul.head()
+'''
+        st.code(code, language='python', line_numbers=True)
+        
         for indx, row in df_seoul.iterrows():
             # pm10 = row[5]
             pm10 = row['PM10']
@@ -4948,29 +5583,30 @@ df_summary.head()
         df_seoul['PM10_class'].value_counts().plot(kind="bar")
         st.pyplot(plt)
         plt.close()
-        st.write("**Examine Strongest Correlation**")
+        st.divider()
+
+        st.subheader(f"{idx.getSubIdx()}Examine Strongest Correlation")
         st.write("seaborn과 jointplot을 사용하여 두 변수 간의 관계를 시각화 하였습니다.")
         st.write("df_seoul 데이터프레임의 'CO'와 'NO2'라는 두 변수 간의 상관관계를 시각화 하였습니다.")
-        with st.echo():
-            sns.jointplot(x=df_seoul["CO"], y=df_seoul["NO2"], kind='kde', xlim=(0,1),ylim=(0,0.13), color='g')
-            plt.show()
+        code = '''
+sns.jointplot(x=df_seoul["CO"], y=df_seoul["NO2"], kind='kde', xlim=(0,1),ylim=(0,0.13), color='g')
+plt.show()'''
+        st.code(code, language='python', line_numbers=True)
+        sns.jointplot(x=df_seoul["CO"], y=df_seoul["NO2"], kind='kde', xlim=(0,1),ylim=(0,0.13), color='g')
         st.pyplot(plt)
         plt.close()
 
+        st.header(f"{idx.getHeadIdx()}결론 도출")
+        st.subheader(f"{idx.getSubIdx()}대기 오염 데이터 분석 결과")
+        st.write("- 시계열 그래프를 통해 일별 평균 대기오염 수치를 시각화하며, 특정 대기오염 물질이 시간에 따라 어떻게 변하는지를 보여줍니다.")
+        st.write("- 상관 행렬의 히트맵은 각 대기오염 물질 간의 상관관계를 색상으로 나타냅니다. 이 분석을 통해 SO2, NO2, O3, CO, PM10, PM2.5 간의 상관관계를 확인할 수 있습니다.")
+        st.write("- 이번 분석을 통해 서울시(종로구)의 대기오염 상황을 깊이 이해할 수 있었습니다. PM10 농도에 따라 대기질을 구분하고, 각 대기오염 물질 간의 상관관계를 분석하여 서울의 대기오염 패턴을 더 잘 이해할 수 있습니다.")
+
     elif path == ("실습 프로젝트", "지역별 음식점 소비 트렌드 분석"):
-
-        # 한글폰트 적용
-        # 폰트 적용#########################################추가부분
-        import os
         import io
-        from matplotlib import font_manager as fm
-
-        fpath = os.path.join(os.getcwd(), "customfont/NanumGothic-Regular.ttf")
-        prop = fm.FontProperties(fname=fpath)
-        ####################################################
         import numpy as np
         import seaborn as sns
-
+    
         st.header(f"{idx.getHeadIdx()}지역별 음식점 소비기반 트렌드 데이터")
         st.write("지역별 음식점 소비 데이터를 활용하여 데이터 로드부터, 데이터 탐색 및 분석, 시각화, 결론 도출까지 실습 진행해보겠습니다.")
 
@@ -4988,20 +5624,20 @@ df_summary.head()
 
         st.write('- 실습을 위해 **아래의 버튼**을 클릭하여 데이터를 다운로드 해주세요')
         
-        with open('pages/data/음식점소비트렌드/음식점소비트렌드데이터.csv', "rb") as template_file:
+        with open('data/음식점소비트렌드/음식점소비트렌드데이터.csv', "rb") as template_file:
             template_csv = template_file.read()
 
         st.download_button(label="download data",
                             type="primary",
                             data=template_csv,
-                           file_name = "음식점소비트렌드데이터.csv"
+                        file_name = "음식점소비트렌드데이터.csv"
         )
 
-        st.code("import pandas as pd\n\ndf_map = pd.read_csv('음식점소비트렌드데이터.csv')")
+        st.code("import pandas as pd\n\ndf_map = pd.read_csv('음식점소비트렌드데이터.csv')", line_numbers=True)
         import pandas as pd
         df_map = pd.read_csv('data/음식점소비트렌드/음식점소비트렌드데이터.csv')
 
-        st.code('df_map')
+        st.code('df_map', line_numbers=True)
         st.write(df_map)
         st.divider()
 
@@ -5014,59 +5650,59 @@ df_summary.head()
 
         st.subheader(f"{idx.getSubIdx()}통계 값으로 데이터 탐색하기")
 
-        st.code('# 행과 열의 수 확인\ndf_map.shape')
+        st.code('# 행과 열의 수 확인\ndf_map.shape', line_numbers=True)
         st.write(df_map.shape)
 
-        st.code('# 기본 정보 확인\ndf_map.info()')
+        st.code('# 기본 정보 확인\ndf_map.info()', line_numbers=True)
         buffer = io.StringIO()
         df_map.info(buf=buffer)
         s = buffer.getvalue()
         st.text(s)
 
-        st.code('# 결측치 개수 확인 isnull()\ndf_map.isnull().sum()')
+        st.code('# 결측치 개수 확인 isnull()\ndf_map.isnull().sum()', line_numbers=True)
         st.write(df_map.isnull().sum())
 
-        st.code('# 중복 데이터 확인 duplicated()\ndf_map.duplicated().sum()')
+        st.code('# 중복 데이터 확인 duplicated()\ndf_map.duplicated().sum()', line_numbers=True)
         st.write(df_map.duplicated().sum())
 
-        st.code('# 앞의 다섯 개 확인\ndf_map.head()')
+        st.code('# 앞의 다섯 개 확인\ndf_map.head()', line_numbers=True)
         st.write(df_map.head())
 
-        st.code('# 마지막 다섯 개 확인\ndf_map.tail()')
+        st.code('# 마지막 다섯 개 확인\ndf_map.tail()', line_numbers=True)
         st.write(df_map.tail())
 
-        st.code('# 통계 데이터 확인\ndf_map.describe()')
+        st.code('# 통계 데이터 확인\ndf_map.describe()', line_numbers=True)
         st.write(df_map.describe())
 
-        st.code('# 개별 칼럼 통계치 - 거주자 평균\ndf_map.POPLTN_CO.mean()')
+        st.code('# 개별 칼럼 통계치 - 거주자 평균\ndf_map.POPLTN_CO.mean()', line_numbers=True)
         st.write(df_map.POPLTN_CO.mean())
 
-        st.code('# 전체 식당 수\ndf_map.FOOD_FCLTY_CO.sum()')
+        st.code('# 전체 식당 수\ndf_map.FOOD_FCLTY_CO.sum()', line_numbers=True)
         st.write(df_map.FOOD_FCLTY_CO.sum())
 
-        st.code('# 특정 칼럼의 고유한 값 확인 value_counts()\nCTPRVN_NM.value_counts()')  
+        st.code('# 특정 칼럼의 고유한 값 확인 value_counts()\nCTPRVN_NM.value_counts()', line_numbers=True)  
         st.write(df_map.CTPRVN_NM.value_counts())
 
-        st.code('# SIGNGU_NM의 고유한 값\ndf_map.SIGNGU_NM.value_counts()')
+        st.code('# SIGNGU_NM의 고유한 값\ndf_map.SIGNGU_NM.value_counts()', line_numbers=True)
         st.write(df_map.SIGNGU_NM.value_counts())
 
-        st.code('# 특정 칼럼의 고유한 값 개수 확인 nunique() -  CTPRVN_NM\ndf_map.CTPRVN_NM.nunique()')
+        st.code('# 특정 칼럼의 고유한 값 개수 확인 nunique() -  CTPRVN_NM\ndf_map.CTPRVN_NM.nunique()', line_numbers=True)
         st.write(df_map.CTPRVN_NM.nunique())
 
-        st.code('# 식당 종류 확인\ndf_map.FOOD_FCLTY_NM.value_counts()')
+        st.code('# 식당 종류 확인\ndf_map.FOOD_FCLTY_NM.value_counts()', line_numbers=True)
         st.write(df_map.FOOD_FCLTY_NM.value_counts())
 
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}조건 인덱싱으로 탐색하기")
 
-        st.code('''# 시군구 이름이 강서구인 데이터\ndf_map[df_map['SIGNGU_NM'] == '강서구']''')
+        st.code('''# 시군구 이름이 강서구인 데이터\ndf_map[df_map['SIGNGU_NM'] == '강서구']''', line_numbers=True)
         st.write(df_map[df_map['SIGNGU_NM'] == '강서구'])
 
-        st.code('''# 서울시 강서구만 가져오기 --- 서울시 & 강서구\ndf_map[(df_map.CTPRVN_NM == '서울특별시') & (df_map.SIGNGU_NM == '강서구')]''')
+        st.code('''# 서울시 강서구만 가져오기 --- 서울시 & 강서구\ndf_map[(df_map.CTPRVN_NM == '서울특별시') & (df_map.SIGNGU_NM == '강서구')]''', line_numbers=True)
         st.write(df_map[(df_map.CTPRVN_NM == '서울특별시') & (df_map.SIGNGU_NM == '강서구')])
 
-        st.code('''# 서울시 강남구 식당수 --> df_map[강남구 & 서울특별시]['FOOD_FCLTY_NM'].sum()\ndf_map[(df_map.SIGNGU_NM == '강남구')&(df_map.CTPRVN_NM == '서울특별시')].FOOD_FCLTY_CO.sum()''')
+        st.code('''# 서울시 강남구 식당수 --> df_map[강남구 & 서울특별시]['FOOD_FCLTY_NM'].sum()\ndf_map[(df_map.SIGNGU_NM == '강남구')&(df_map.CTPRVN_NM == '서울특별시')].FOOD_FCLTY_CO.sum()''', line_numbers=True)
         st.write(df_map[(df_map.SIGNGU_NM == '강남구')&(df_map.CTPRVN_NM == '서울특별시')].FOOD_FCLTY_CO.sum())
         st.divider()
 
@@ -5075,10 +5711,10 @@ df_summary.head()
         
         st.code('''# 피벗테이블 - 시군구별 식당수 합계 데이터프레임만들기
 df_식당수 = pd.pivot_table(df_map,
-                        index=['CTPRVN_NM', 'SIGNGU_NM'],
-                        values= 'FOOD_FCLTY_CO',
-                        aggfunc= 'sum')
-df_식당수''')
+                    index=['CTPRVN_NM', 'SIGNGU_NM'],
+                    values= 'FOOD_FCLTY_CO',
+                    aggfunc= 'sum')
+df_식당수''', line_numbers=True)
         df_식당수 = pd.pivot_table(df_map,
                         index=['CTPRVN_NM', 'SIGNGU_NM'],
                         values= 'FOOD_FCLTY_CO',
@@ -5086,18 +5722,17 @@ df_식당수''')
         st.write(df_식당수)
 
         st.code('''# 전체 식당 수 다시 확인
-df_식당수.FOOD_FCLTY_CO.sum())''')
+df_식당수.FOOD_FCLTY_CO.sum())''', line_numbers=True)
         st.write(df_식당수.FOOD_FCLTY_CO.sum())
-        st.code('''df_map.FOOD_FCLTY_CO.sum()''')
-        st.write(df_map.FOOD_FCLTY_CO.sum())
+
 
         st.code('''# 시군구별 인구수 합계 데이터프레임 만들기
 
 df_인구수 = pd.pivot_table(df_map,
-                        index=['CTPRVN_NM', 'SIGNGU_NM'],
-                        values= 'POPLTN_CO',
-                        aggfunc= 'min')
-df_인구수''')
+                    index=['CTPRVN_NM', 'SIGNGU_NM'],
+                    values= 'POPLTN_CO',
+                    aggfunc= 'min')
+df_인구수''', line_numbers=True)
         df_인구수 = pd.pivot_table(df_map,
                         index=['CTPRVN_NM', 'SIGNGU_NM'],
                         values= 'POPLTN_CO',
@@ -5111,11 +5746,11 @@ df_인구수''')
         st.subheader(f"{idx.getSubIdx()}데이터 프레임 합치기")
 
         st.code('''df_pivot = pd.concat([df_식당수,df_인구수], axis=1)
-df_pivot''')
+df_pivot''', line_numbers=True)
         df_pivot = pd.concat([df_식당수,df_인구수], axis=1)
         st.write(df_pivot)
 
-        st.code('''df_pivot.info()''')
+        st.code('''df_pivot.info()''', line_numbers=True)
         buffer = io.StringIO()
         df_pivot.info(buf=buffer)
         s = buffer.getvalue()
@@ -5126,7 +5761,7 @@ df_pivot''')
         st.code('''# 칼럼이름 변경{'FOOD_FCLTY_CO':'식당수', 'POPLTN_CO':'인구수'}
 
 df_pivot.rename(columns={'FOOD_FCLTY_CO':'식당수', 'POPLTN_CO':'인구수'}, inplace=True)
-df_pivot.head()''')
+df_pivot.head()''', line_numbers=True)
         df_pivot.rename(columns={'FOOD_FCLTY_CO':'식당수', 'POPLTN_CO':'인구수'}, inplace=True)
         st.write(df_pivot.head())
 
@@ -5134,11 +5769,11 @@ df_pivot.head()''')
 
         st.code('''# 서울시만 저장
 df_seoul = df_pivot.loc['서울특별시']
-df_seoul.head()''')
+df_seoul.head()''', line_numbers=True)
         df_seoul = df_pivot.loc['서울특별시']
         st.write(df_seoul.head())
 
-        st.code('''df_seoul.to_csv('seoul.csv')''')
+        st.code('''df_seoul.to_csv('seoul.csv')''', line_numbers=True)
         # df_seoul.to_csv('seoul.csv')
         
         st.divider()
@@ -5156,7 +5791,7 @@ from matplotlib import rc
 rc('font', family='Malgun Gothic')
 
 # 유니코드에서  음수 부호설정
-mpl.rc('axes', unicode_minus=False)''')
+mpl.rc('axes', unicode_minus=False)''', line_numbers=True)
         
         import pandas as pd
         import matplotlib as mpl
@@ -5172,8 +5807,8 @@ mpl.rc('axes', unicode_minus=False)''')
         st.subheader(f"{idx.getSubIdx()}서울시 데이터 불러오기")
 
         st.code('''# 가공한 서울시 데이터 불러오기
-df_seoul = pd.read_csv('seoul.csv')''')
-        st.code('df_seoul.head()')
+df_seoul = pd.read_csv('seoul.csv')''', line_numbers=True)
+        st.code('df_seoul.head()', line_numbers=True)
         df_seoul = pd.read_csv('data/seoul.csv')
         st.write(df_seoul.head())
 
@@ -5182,13 +5817,12 @@ df_seoul = pd.read_csv('seoul.csv')''')
         st.subheader(f"{idx.getSubIdx()}식당수 시각화")
         st.write('서울시 데이터를 활용하여 식당 분포 꺾은선 그래프를 도출해보겠습니다.')
 
-       
+    
 
         st.code('''# 서울시 식당분포 그리기
 plt.title('서울시 식당 분포')
 plt.plot(df_seoul['SIGNGU_NM'], df_seoul['식당수'], 'r*-')
-plt.show()''')
-
+plt.show()''', line_numbers=True)
         
         plt.title('서울시 식당 분포', fontproperties=prop)
         plt.plot(df_seoul['SIGNGU_NM'], df_seoul['식당수'], 'r*-')
@@ -5201,8 +5835,8 @@ plt.show()''')
 plt.figure(figsize=(20, 4))
 plt.title('서울시 식당 분포')
 plt.plot(df_seoul['SIGNGU_NM'], df_seoul['식당수'], 'r*-')
-plt.show()''')
-        
+plt.show()''', line_numbers=True)
+
         # 화면 사이즈 설정과 글씨 회전
         plt.figure(figsize=(20, 4))
         plt.title('서울시 식당 분포', fontproperties=prop)
@@ -5219,8 +5853,8 @@ plt.plot(df_seoul['SIGNGU_NM'], df_seoul['식당수'], 'r*-')
 # x라벨을 회전
 plt.xticks(rotation=60) # 시계 반대방향으로 60도 회전
 plt.ylabel('문화체육관광시설 인근 음식점')
-plt.show()''')
-        
+plt.show()''', line_numbers=True)
+
         plt.figure(figsize=(8, 4))
         plt.title('서울시 식당 분포', fontproperties=prop)
         plt.plot(df_seoul['SIGNGU_NM'], df_seoul['식당수'], 'r*-')
@@ -5241,7 +5875,7 @@ plt.bar(df_seoul['SIGNGU_NM'], df_seoul['식당수'], color='hotpink')
 # x라벨을 회전
 plt.xticks(rotation=60)
 plt.ylabel('문화체육관광시설 인근 음식점')
-plt.show()''')
+plt.show()''', line_numbers=True)
 
 
         plt.figure(figsize=(8, 4))
@@ -5252,17 +5886,17 @@ plt.show()''')
         plt.xticks(rotation=60, fontproperties=prop)
         plt.ylabel('문화체육관광시설 인근 음식점', fontproperties=prop)
         st.pyplot(plt)
-        
+
         st.divider()
 
         st.subheader(f"{idx.getSubIdx()}인구수 시각화")
 
         st.write('인구수만 활용하여 그래프를 시각화해보겠습니다.')
-        
+
         st.code('''# 인구수만 포함하는 데이터 프레임 만들기
 df_인구 = df_seoul.drop('식당수', axis=1)
 df_인구.set_index('SIGNGU_NM', inplace=True)
-df_인구''')
+df_인구''', line_numbers=True)
         # 인구수만 포함하는 데이터 프레임 만들기
         df_인구 = df_seoul.drop('식당수', axis=1)
         df_인구.set_index('SIGNGU_NM', inplace=True)
@@ -5272,8 +5906,8 @@ df_인구''')
 df_인구.plot(kind='bar', figsize=(10,5), color='orange')
 plt.xticks(rotation=60)
 plt.xlabel('') # xlabel 이름을 지우기
-plt.show()''')
-        
+plt.show()''', line_numbers=True)
+
         # 서울시 인구분포 막대그래프 그리기
         df_인구.plot(kind='bar', figsize=(10,5), color='orange')
         plt.xticks(rotation=60, fontproperties=prop)
@@ -5284,8 +5918,8 @@ plt.show()''')
 df_인구.plot(kind='barh', figsize=(10,5), color='orange')
 # plt.xticks(rotation=60)
 plt.ylabel('')
-plt.show()''')
-        
+plt.show()''', line_numbers=True)
+
         # 수평 막대그래프 그리기 barh
         df_인구.plot(kind='barh', figsize=(10,5), color='orange')
         # plt.xticks(rotation=60)
@@ -5306,8 +5940,8 @@ ax = fig.add_subplot(1,1,1) # 1행 1열 1번째
 
 ax.bar(df_인구.index, df_인구['인구수'], color='orange')
 plt.xticks(rotation=60)
-plt.show()''')
-        
+plt.show()''', line_numbers=True)
+
         # 서브플롯 그리기
         fig = plt.figure(figsize=(10,5))
         ax = fig.add_subplot(1,1,1) # 1행 1열 1번째
@@ -5323,7 +5957,7 @@ fig = plt.figure(figsize=(20,5))
 
 ax1 = fig.add_subplot(1,2,1)  # 1행 2열 중 첫번째(왼쪽)
 ax2 = fig.add_subplot(1,2,2)  # 1행 2열 중 두번째(오른쪽)
-                
+            
 # 인구수 막대그래프
 ax1.bar(df_인구.index, df_인구['인구수'], color='green')
 ax1.set_title('서울시 인구분포')
@@ -5334,8 +5968,8 @@ ax2.plot(df_seoul['SIGNGU_NM'], df_seoul['식당수'], 'ro-')
 ax2.set_title('서울시 식당분포')
 ax2.set_xticklabels(df_seoul['SIGNGU_NM'], rotation=45)
 
-plt.show()''')
-        
+plt.show()''', line_numbers=True)
+
         # 서브 플롯
         fig = plt.figure(figsize=(20,5))
 
@@ -5370,8 +6004,8 @@ ax2.plot(df_seoul['SIGNGU_NM'], df_seoul['식당수'], 'ro-')
 ax2.set_title('서울시 식당분포')
 ax2.set_xticklabels(df_seoul['SIGNGU_NM'], rotation=45)
 
-plt.show()''')
-        
+plt.show()''', line_numbers=True)
+
         # 서브 플롯
         fig = plt.figure(figsize=(20,10))
 
@@ -5399,7 +6033,7 @@ plt.show()''')
 
         st.code('''# 인구 100명당 식당수 비율 칼럼 생성
 df_seoul['식당비율'] = (df_seoul.식당수 / (df_seoul.인구수*0.01))
-df_seoul.head()''')
+df_seoul.head()''', line_numbers=True)
         # 인구 100명당 식당수 비율 칼럼 생성
         df_seoul['식당비율'] = (df_seoul.식당수 / (df_seoul.인구수*0.01))
         st.write(df_seoul.head())
@@ -5410,7 +6044,7 @@ plt.figure(figsize=(8,4))
 plt.title('인구 수 대비 식당수')
 plt.plot(df_seoul.SIGNGU_NM, df_seoul.식당비율, 'b+-.')
 plt.xticks(rotation=45)
-plt.show()''')
+plt.show()''', line_numbers=True)
 
         plt.figure(figsize=(8,4))
         plt.title('인구 수 대비 식당수', fontproperties=prop)
@@ -5425,15 +6059,15 @@ plt.title('서울시 구별 인구수 대비 식당수')
 plt.bar(df_seoul.SIGNGU_NM, df_seoul.식당수, color='pink')
 plt.plot(df_seoul.SIGNGU_NM, df_seoul.식당비율, 'b*-')
 plt.xticks(rotation=45)
-plt.show()''')
-
+plt.show()''', line_numbers=True)
+    
         plt.figure(figsize=(12,8))
         plt.title('서울시 구별 인구수 대비 식당수', fontproperties=prop)
         plt.bar(df_seoul.SIGNGU_NM, df_seoul.식당수, color='pink')
         plt.plot(df_seoul.SIGNGU_NM, df_seoul.식당비율, 'b*-')
         plt.xticks(rotation=45, fontproperties=prop)
         st.pyplot(plt)
-
+    
         st.code('''# twinx()함수로 2축 그래프 그리기
 
 plt.figure(figsize=(10,4))
@@ -5445,47 +6079,46 @@ plt.xticks(rotation=-45)
 y_right = plt.twinx()
 y_right.plot(df_seoul.SIGNGU_NM, df_seoul.식당비율, color='purple', marker='o', label='인구 수 대비 음식점')
 plt.legend(bbox_to_anchor=(0.23, 1.12))
-plt.show()''')
-
-
+plt.show()''', line_numbers=True)
+    
+    
         plt.figure(figsize=(10,4))
         plt.title('서울특별시', fontproperties=prop)
         plt.bar(df_seoul.SIGNGU_NM, df_seoul.식당수, color='green', label='음식점수')
         plt.legend(bbox_to_anchor=(0.15, 1.22), prop=prop)
         plt.xticks(rotation=-45, fontproperties=prop)
-
+    
         y_right = plt.twinx()
         y_right.plot(df_seoul.SIGNGU_NM, df_seoul.식당비율, color='purple', marker='o', label='인구 수 대비 음식점')
         plt.legend(bbox_to_anchor=(0.23, 1.12), prop=prop)
         st.pyplot(plt)
-
+    
         st.divider()
-
+    
         st.subheader(f"{idx.getSubIdx()}심화 - 거주자 원 그래프 그리기")
         st.write('거주자가 많은 순서대로 원 그래프를 그려보겠습니다.')
         st.write('- df를 인구수를 기준으로 정렬하여 저장합니다.')
-
-
+    
+    
         st.code('''#거주자순
 df_거주자순 = df_seoul.sort_values('인구수', ascending=False, ignore_index=True)
-df_거주자순''')
+df_거주자순''', line_numbers=True)
         df_거주자순 = df_seoul.sort_values('인구수', ascending=False, ignore_index=True)
         st.write(df_거주자순)
-
+    
         st.write('- 비율은 소수점 아래 한 자리까지 나타내도록 하여 원 그래프를 시각화합니다.')
-
+    
         st.code('''#원그래프 그리기
 plt.figure(figsize=(8,8), dpi=100)
 df_거주자순['인구수'].plot(kind='pie', label='', autopct='%.1f%%', startangle = 45, labels=df_거주자순['SIGNGU_NM'], cmap='rainbow')
-plt.show()''')
-
+plt.show()''', line_numbers=True)
+    
         plt.figure(figsize=(8,8), dpi=100)
-        df_거주자순['인구수'].plot(kind='pie', label='', autopct='%.1f%%', startangle = 45, labels=df_거주자순['SIGNGU_NM'], cmap='rainbow', textprops={'font': prop})
-        
-        # plt.rc('font', family='Malgun Gothic')
+        df_거주자순['인구수'].plot(kind='pie', label='', autopct='%.1f%%', startangle = 45, labels=df_거주자순['SIGNGU_NM'], cmap='rainbow', textprops={'font':prop})
+        plt.xticks(fontproperties=prop)
         st.pyplot(plt)
         st.divider()
-
+    
         st.header(f"{idx.getHeadIdx()}결론 도출")
         
         st.subheader(f"{idx.getSubIdx()}음식점 소비 트렌드 기반 분석 결과")
@@ -5498,7 +6131,7 @@ plt.show()''')
         st.write('- 인구수가 많다고 해서 반드시 식당 수가 많은 것은 아니었습니다.')
         st.write('- **주거 중심** vs **상업 중심**에 따라 차이가 있음을 알 수 있습니다.')
         st.write('- 중구와 같이 주거 인구는 적지만, 식당 비율이 높은 지역은 유동인구나 관광객의 영향이 큰 것으로 보입니다.')
-
+    
         st.divider()
         
         st.subheader(f"{idx.getSubIdx()}분석 결과 활용법")
@@ -5506,22 +6139,509 @@ plt.show()''')
         st.write('- 2개의 그래프를 함께 나타내기 (인구수와 식당수)')
         st.write('- 막대 그래프 위에 꺾은 선 그래프 나타내기(인구수와 식당 비율)')
         st.write('- 원 그래프(거주자)')
-
+    
         st.write('이러한 시각화 자료를 통해 설득력을 더욱 높일 수 있습니다.')
 
+
+
+    elif path == ("실습 프로젝트", "날씨별 공공자전거 수요 분석"):
+        st.header(f"{idx.getHeadIdx()}날씨별 공공자전거 수요 분석")
+        st.write('''
+                자전거 대여소는 계절과 날씨에 따라 대여 건수의 변동이 심해, 운영 비용에 큰 영향을 미치고 있습니다. 따라서 날씨예보정보를 활용해 대여건수를 사전에 예측하고, 
+                 운영 비용을 조정하기 위한 데이터 분석 및 시각화 실습을 진행합니다.
+                 ''')
+        st.divider()
+
+        st.subheader(f"{idx.getSubIdx()}데이터 불러오기")
+        st.write('- 실습을 위해 **아래의 버튼**을 클릭하여 데이터를 다운로드 해주세요')
+        st.write('해당 파일을 압축 해제해 **실습03** 폴더를 :blue-background[data/실습03/]경로로 이동해주세요.')
+        with open('data/실습03.zip', "rb") as template_file:
+            template_zip = template_file.read()
+
+        st.download_button(label="download data",
+                            type="primary",
+                            data=template_zip,
+                           file_name = "실습03.zip"
+        )
+        st.code('''
+                # 필요한 패키지 설치
+                import numpy as np
+                import pandas as pd
+                import seaborn as sns
+                import matplotlib.pyplot as plt
+
+                #한글 표시
+                plt.rcParams['font.family'] = 'NanumGothic'
+                plt.rc('font', family='NanumGothic')
+                ''', line_numbers=True)
+
+        st.write("실습에 필요한 데이터를 불러오겠습니다.")
+        st.code('''
+                # 기상관측자료 데이터
+                weather_info = pd.read_csv('data/실습03/기상관측자료202306.csv', encoding='cp949')
+
+                #자전거 이용정보 데이터
+                files = [
+                    "data/실습03/공공자전거이용정보0.csv",
+                    "data/실습03/공공자전거이용정보1.csv",
+                    "data/실습03/공공자전거이용정보2.csv",
+                    "data/실습03/공공자전거이용정보3.csv",
+                    "data/실습03/공공자전거이용정보4.csv",
+                    "data/실습03/공공자전거이용정보5.csv"
+                ]
+
+                #파일 병합
+                bike_info = pd.concat([pd.read_csv(file, encoding='cp949') for file in files], ignore_index=True)
+                ''', line_numbers=True)
+        #------------------------------------------------------------
+        
+        import numpy as np
+        import pandas as pd
+        import seaborn as sns
+        import matplotlib.pyplot as plt
+        import io
+        # 기상관측자료 데이터
+        weather_info = pd.read_csv('data/실습03/기상관측자료202306.csv', encoding='cp949')
+
+        #자전거 이용정보 데이터
+        files = [
+            "data/실습03/공공자전거이용정보0.csv",
+            "data/실습03/공공자전거이용정보1.csv",
+            "data/실습03/공공자전거이용정보2.csv",
+            "data/실습03/공공자전거이용정보3.csv",
+            "data/실습03/공공자전거이용정보4.csv",
+            "data/실습03/공공자전거이용정보5.csv"
+        ]
+
+        #파일 병합
+        bike_info = pd.concat([pd.read_csv(file, encoding='cp949') for file in files], ignore_index=True)
+        #------------------------------------------------------------
+        st.write("**weather_info**")
+        st.code('''weather_info.sample(5)''', line_numbers=True)
+        st.write(weather_info.sample(5))
+        
+        st.write("**bike_info**")
+        st.code('''bike_info.sample(5)''', line_numbers=True)
+        st.write(bike_info.sample(5))
+        st.divider()
+        
+        st.header(f"{idx.getHeadIdx()}공공자전거 데이터 전처리")
+        st.subheader(f"{idx.getSubIdx()}집계 데이터 생성")
+        st.write('''날씨 정보와의 결합에 필요한 데이터(**이용건수**)를 생성하기 위해 **대여일자**, **대여시간**으로 집계해줍니다.''')
+        st.code('''
+                #공공자전거 집계 데이터 생성
+                bike_df2 = bike_info.groupby(['대여일자', '대여시간'])['이용건수'].sum()
+                bike_df2 = bike_df2.reset_index() #인덱스 재 정렬 , 기존 인덱스를 열로
+
+                bike_df2.sample(5)
+                ''', line_numbers=True)
+        bike_df2 = bike_info.groupby(['대여일자', '대여시간'])['이용건수'].sum()
+        bike_df2 = bike_df2.reset_index() #인덱스 재 정렬 , 기존 인덱스를 열로
+        st.write(bike_df2.sample(5))
+        st.divider()
+
+        st.subheader(f"{idx.getSubIdx()}파생변수 생성")
+        st.write('''대여일자에서 **년도, 월, 일, 요일, 공휴일** 변수를 생성합니다.''')
+        st.code('''
+                #공공자전거 파생변수 생성
+                bike_df2['대여일자'] = pd.to_datetime(bike_df2['대여일자'])
+                bike_df2['년도'] = bike_df2['대여일자'].dt.year
+                bike_df2['월'] = bike_df2['대여일자'].dt.month
+                bike_df2['일'] = bike_df2['대여일자'].dt.day
+                bike_df2['요일(num)'] = bike_df2['대여일자'].dt.dayofweek
+                bike_df2['공휴일'] = 0  #0: 평일 1: 공휴일
+
+                # 토요일, 일요일을 공휴일로 설정
+                bike_df2.loc[bike_df2['요일(num)'].isin([5,6]),['공휴일']] = 1
+                bike_df2.sample(5)
+                ''',line_numbers=True)
+        
+        bike_df2['대여일자'] = pd.to_datetime(bike_df2['대여일자'])
+        bike_df2['년도'] = bike_df2['대여일자'].dt.year
+        bike_df2['월'] = bike_df2['대여일자'].dt.month
+        bike_df2['일'] = bike_df2['대여일자'].dt.day
+        bike_df2['요일(num)'] = bike_df2['대여일자'].dt.dayofweek
+        bike_df2['공휴일'] = 0  #0: 평일 1: 공휴일
+
+        # 토요일, 일요일을 공휴일로 설정
+        bike_df2.loc[bike_df2['요일(num)'].isin([5,6]),['공휴일']] = 1
+        st.write(bike_df2.sample(5))
+        st.divider()
+
+        st.header(f"{idx.getHeadIdx()}날씨 데이터 전처리")
+        st.subheader(f"{idx.getSubIdx()}날짜, 시간 컬럼 생성")
+        st.write('''자전거 이용정보와의 결합을 위해 **일시** 칼럼에서 **날짜**와 **시간** 정보를 추출합니다.''')
+        st.code('''
+                #날씨 데이터 전처리
+                weather_info['날짜'] = weather_info['일시'].str[:10]
+                weather_info['시간'] = weather_info['일시'].str[11:13].astype(int)
+
+                weather_info.info()
+                ''',line_numbers=True)
+        
+        weather_info['날짜'] = weather_info['일시'].str[:10]
+        weather_info['시간'] = weather_info['일시'].str[11:13].astype(int)
+
+        #weather_info.info() 출력 코드
+        buffer = io.StringIO()
+        weather_info.info(buf=buffer)
+        st.text(buffer.getvalue())
+        st.divider()
+
+        st.subheader(f"{idx.getSubIdx()}컬럼 선택")
+        st.write("분석에 사용할 컬럼을 순서대로 가져와서 새 데이터 프레임을 생성합니다.")
+        st.code('''
+                weather_df = weather_info[['날짜', '시간', '기온(°C)', '강수량(mm)', '풍속(m/s)', '풍향(16방위)', '습도(%)','일조(hr)','일사(MJ/m2)', '적설(cm)','전운량(10분위)', '지면온도(°C)']]
+
+                #칼럼명 변경
+                weather_df.columns = ['날짜', '시간', '기온', '강수량(mm)', '풍속(m/s)', '풍향(16방위)', '습도(%)','일조','일사', '적설(cm)','전운량',  '지면온도']
+                weather_df.columns
+                ''',line_numbers=True)
+        
+        weather_df = weather_info[['날짜', '시간', '기온(°C)', '강수량(mm)', '풍속(m/s)', '풍향(16방위)', '습도(%)','일조(hr)','일사(MJ/m2)', '적설(cm)','전운량(10분위)', '지면온도(°C)']]
+
+        #칼럼명 변경
+        weather_df.columns = ['날짜', '시간', '기온', '강수량(mm)', '풍속(m/s)', '풍향(16방위)', '습도(%)','일조','일사', '적설(cm)','전운량',  '지면온도']
+        st.write(weather_df.columns)
+        st.divider()
+        
+        st.subheader(f"{idx.getSubIdx()}결측치 확인")
+        st.code('''
+                #결측치 확인
+                weather_df.isnull().sum()
+                ''',line_numbers=True)
+        st.write(weather_df.isnull().sum())
+        st.write('''
+                **강수량, 적설, 일조, 일사**와 같이 NaN값이 0인 경우는 0으로 fill 해줍니다. **전운량, 기온, 지면온도, 풍향, 풍속**은 같은 일자의 이전시간대의 데이터로 대체합니다.
+                ''')
+        
+        st.write('''
+                - NaN 값을 0으로 fill (fillna)
+                 ''')
+        st.code('''
+                # NaN 값을 0으로 fill (fillna)
+                weather_df.loc[:, '강수량(mm)'] = weather_df['강수량(mm)'].fillna(0)
+                weather_df.loc[:, '적설(cm)'] = weather_df['적설(cm)'].fillna(0)
+                weather_df.loc[:, '일조'] = weather_df['일조'].fillna(0)
+                weather_df.loc[:, '일사'] = weather_df['일사'].fillna(0)
+                ''',line_numbers=True)
+        weather_df.loc[:, '강수량(mm)'] = weather_df['강수량(mm)'].fillna(0)
+        weather_df.loc[:, '적설(cm)'] = weather_df['적설(cm)'].fillna(0)
+        weather_df.loc[:, '일조'] = weather_df['일조'].fillna(0)
+        weather_df.loc[:, '일사'] = weather_df['일사'].fillna(0)
+
+        st.write('''
+                - NaN 값을 직전 데이터의 값으로 fill (ffill)
+                 ''')
+        st.code('''
+                # NaN 값을 직전 데이터의 값으로 fill (ffill)
+                # 날짜 시간으로 정렬
+                weather_df = weather_df.sort_values(['날짜','시간'])
+
+                # 전 값으로 
+                weather_df['기온'] = weather_df['기온'].ffill()
+                weather_df['풍속(m/s)']= weather_df['풍속(m/s)'].ffill()
+                weather_df['풍향(16방위)'] = weather_df['풍향(16방위)'].ffill()
+                weather_df['전운량'] = weather_df['전운량'].ffill()
+                weather_df['지면온도'] = weather_df['지면온도'].ffill()
+                ''',line_numbers=True)
+        # NaN 값을 직전 데이터의 값으로 fill (ffill)
+        # 날짜 시간으로 정렬
+        weather_df = weather_df.sort_values(['날짜','시간'])
+
+        # 전 값으로 
+        weather_df['기온'] = weather_df['기온'].ffill()
+        weather_df['풍속(m/s)']= weather_df['풍속(m/s)'].ffill()
+        weather_df['풍향(16방위)'] = weather_df['풍향(16방위)'].ffill()
+        weather_df['전운량'] = weather_df['전운량'].ffill()
+        weather_df['지면온도'] = weather_df['지면온도'].ffill()
+        
+        st.write("결측치를 제거한 결과를 확인해보겠습니다.")
+        st.code('''
+                #결측치 제거 확인
+                weather_df.isnull().sum()
+                ''',line_numbers=True)
+        st.write(weather_df.isnull().sum())
+        st.divider()
+
+        st.header(f"{idx.getHeadIdx()}데이터 결합")
+        st.write("전처리된 공공자전거 데이터와 날씨 데이터를 결합해 날씨별 자전거 대여 데이터를 만들어보겠습니다.")
+        st.code('''
+                #데이터 결합
+                weather_df['날짜'] = pd.to_datetime(weather_df['날짜'])
+
+                #데이터 타입 맞추기 
+                bike_mg = pd.merge (bike_df2, 
+                                    weather_df, 
+                                    left_on =['대여일자', '대여시간'], 
+                                    right_on = ['날짜', '시간']) #default = inner 
+                bike_mg.head()
+                ''',line_numbers=True)
+        #데이터 결합
+        weather_df['날짜'] = pd.to_datetime(weather_df['날짜'])
+
+        #데이터 타입 맞추기 
+        bike_mg = pd.merge (bike_df2, 
+                            weather_df, 
+                            left_on =['대여일자', '대여시간'], 
+                            right_on = ['날짜', '시간']) #default = inner 
+        st.write(bike_mg.head())
+
+        st.write("**대여일자, 날짜, 시간** 데이터가 중복되는 것을 확인할 수 있습니다. 중복되는 데이터를 제거해보겠습니다.")
+        st.code('''
+                #중복데이터 제거
+                bike_mg = bike_mg.drop(['대여일자', '날짜', '시간'], axis = 1)
+
+                bike_mg.head()
+                ''',line_numbers=True)
+        #중복데이터 제거
+        bike_mg = bike_mg.drop(['대여일자', '날짜', '시간'], axis = 1)
+        st.write(bike_mg.head())
+        st.divider()
+
+        st.header(f"{idx.getHeadIdx()}데이터 시각화")
+        st.write("원본 데이터프레임을 보존하기 위해 복사본을 생성한 후 시각화를 진행하겠습니다.")
+        st.code('''
+                #복사본 생성
+                data = bike_mg.copy()
+                ''',line_numbers=True)
+        data = bike_mg.copy()
+
+        st.subheader(f"{idx.getSubIdx()}데이터 요약 통계")
+        st.write("데이터의 요약 통계를 확인해 정상적인 값인지 확인해보겠습니다.")
+        st.code('''
+                #데이터 요약 통계
+                desc_df = data.describe().T
+                desc_df
+                ''',line_numbers=True)
+        desc_df = data.describe().T
+        st.write(desc_df)
+        st.divider()
+
+        st.subheader(f"{idx.getSubIdx()}이용건수 분포 시각화")
+        st.code('''
+                sns.histplot(data['이용건수'])
+
+                plt.show()
+                ''',line_numbers=True)
+
+        fig, ax = plt.subplots()
+        sns.histplot(data['이용건수'], ax=ax)
+        ax.set_title("이용건수 분포", fontproperties=prop)
+        ax.set_xlabel("이용건수", fontproperties=prop)
+        
+        st.pyplot(fig)
+        plt.close(fig)
+        
+
+        st.code('''
+                sns.lineplot(x=data['일'], y=data['이용건수'])
+
+                plt.show()
+                ''',line_numbers=True)
+        fig, ax = plt.subplots()
+        sns.lineplot(x=data['일'], y=data['이용건수'], ax=ax)
+        ax.set_xlabel("일", fontproperties=prop)
+        ax.set_ylabel("이용 건수", fontproperties=prop)
+        
+        st.pyplot(fig)
+        plt.close(fig)
+
+        st.divider()
+        
+        st.subheader(f"{idx.getSubIdx()}피처의 분포 시각화")
+        st.write("원하는 컬럼을 선택해 피처의 분포를 확인합니다.")
+        st.code('''
+                #컬럼 선택
+                con_cols = ["기온", "강수량(mm)", "풍속(m/s)", "습도(%)", "일조"]
+                ''',line_numbers=True)
+        con_cols = ["기온", "강수량(mm)", "풍속(m/s)", "습도(%)", "일조"]
+        
+        
+        st.write("선택된 칼럼에 대한 피처의 분포를 시각화합니다.")
+        st.code('''
+                #피처의 분포 시각화
+                fig, axes = plt.subplots(1,5, figsize = (20, 4))
+                ax = axes.flatten()
+                
+                # axes = (n,n)형태 / ax = m형태
+                for i, col in enumerate(con_cols):
+                    sns.histplot(data = data, x = col, ax = ax[i])
+
+                plt.show()
+                ''',line_numbers=True)
+        
+        fig, axes = plt.subplots(1,5, figsize = (20, 4))
+        ax = axes.flatten()
+        # axes = (n,n)형태 / ax = m형태
+        for i, col in enumerate(con_cols):
+            sns.histplot(data = data, x = col, ax = ax[i])
+            ax[i].set_xlabel(col, fontproperties=prop)
+        
+        st.pyplot(fig)
+        plt.close(fig)
+        st.divider()
+
+        st.subheader(f"{idx.getSubIdx()}이용건수와 피처와의 관계")
+        st.write("공공자전거 이용 건수와 피처와의 관계를 시각화합니다.")
+        st.code('''
+                fig, axes = plt.subplots(2,2, figsize = (20,8))
+                
+                sns.barplot(data = data, x = '일', y= '이용건수', ax = axes[0,0])
+                sns.barplot(data = data, x = '공휴일', y= '이용건수', ax = axes[0,1])
+                sns.lineplot(data = data, x = '기온', y= '이용건수', ax = axes[1,0])
+                sns.lineplot(data = data, x = '강수량(mm)', y= '이용건수', ax = axes[1,1])
+
+                #제목 설정 
+                axes[0,0].set_title('일별 이용건수')
+                axes[0,1].set_title('공휴일여부에 따른 이용건수')
+                axes[1,0].set_title('기온별 이용건수')
+                axes[1,1].set_title('강수량(mm)별 이용건수')
+
+                # 간격조정
+                fig.subplots_adjust(hspace = 0.4)
+
+                plt.show()
+                ''',line_numbers=True)
+        
+        fig, axes = plt.subplots(2,2, figsize = (20,8))
+                
+        sns.barplot(data = data, x = '일', y= '이용건수', ax = axes[0,0])
+        sns.barplot(data = data, x = '공휴일', y= '이용건수', ax = axes[0,1])
+        sns.lineplot(data = data, x = '기온', y= '이용건수', ax = axes[1,0])
+        sns.lineplot(data = data, x = '강수량(mm)', y= '이용건수', ax = axes[1,1])
+
+        #제목 설정 
+        axes[0,0].set_title('일별 이용건수', fontproperties=prop)
+        axes[0,0].set_xlabel("일", fontproperties=prop)
+        axes[0,0].set_ylabel("이용건수", fontproperties=prop)
+        
+        axes[0,1].set_title('공휴일여부에 따른 이용건수', fontproperties=prop)
+        axes[0,1].set_xlabel("공휴일", fontproperties=prop)
+        axes[0,1].set_ylabel("이용건수", fontproperties=prop)
+        
+        axes[1,0].set_title('기온별 이용건수', fontproperties=prop)
+        axes[1,0].set_xlabel("기온", fontproperties=prop)
+        axes[1,0].set_ylabel("이용건수", fontproperties=prop)
+        
+        axes[1,1].set_title('강수량(mm)별 이용건수', fontproperties=prop)
+        axes[1,1].set_xlabel("강수량(mm)", fontproperties=prop)
+        axes[1,1].set_ylabel("이용건수", fontproperties=prop)
+
+        # 간격조정
+        fig.subplots_adjust(hspace = 0.4)
+
+        
+        st.pyplot(fig)
+        plt.close(fig)
+        st.write('''
+                - 공휴일 이용건수보다 평일 이용건수가 더 많습니다.
+                - 기온이 높을수록 이용건수가 증가하는 경향을 보입니다.
+                - 강수량이 적을수록 이용건수가 높습니다.
+                ''')
+    
+        st.divider()
+
+        st.subheader(f"{idx.getSubIdx()}평일과 공휴일 이용건수 차이")
+        st.code('''
+                sns.pointplot(x='대여시간', y='이용건수',data = data, hue = '공휴일')
+            
+                plt.show()
+                ''',line_numbers=True)
+        
+        fig, ax = plt.subplots()
+        sns.pointplot(x='대여시간', y='이용건수',data = data, hue = '공휴일', ax=ax)
+        ax.set_xlabel("대여시간", fontproperties=prop)
+        ax.set_ylabel("이용건수", fontproperties=prop)
+        
+        handles, labels = ax.get_legend_handles_labels()
+        ax.legend(handles, labels, title='공휴일', title_fontproperties=prop, prop=prop)
+
+        st.pyplot(fig)
+        plt.close(fig)
+        st.write('''평일과 공휴일에는 완전히 다른 이용 현황을 보이는 것을 확인할 수 있습니다.
+                 평일의 경우 오전 8시, 오후 6시에 이용건수 피크를 보이는데, 출퇴근으로 인한 영향으로 추측해볼 수 있겠습니다.
+                 ''')
+        st.divider()
+
+        st.subheader(f"{idx.getSubIdx()}요일에 따른 이용건수 차이")
+        st.code('''
+                sns.pointplot(x='대여시간', y='이용건수',data = data, hue = '요일(num)')
+
+                plt.show()
+                ''',line_numbers=True)
+        fig, ax = plt.subplots()
+        sns.pointplot(x='대여시간', y='이용건수',data = data, hue = '요일(num)', ax=ax)
+        ax.set_xlabel("대여시간", fontproperties=prop)
+        ax.set_ylabel("이용건수", fontproperties=prop)
+        handles, labels = ax.get_legend_handles_labels()
+        ax.legend(handles, labels, title='요일(num)', title_fontproperties=prop, prop=prop)
+       
+
+        st.pyplot(fig)
+        plt.close(fig)
+        st.write("토요일에 이용건수가 더 많고, 토요일 오후에 전반적으로 이용률이 높은 모습을 보입니다.")
+        
+        st.divider()
+
+        st.subheader(f"{idx.getSubIdx()}요일에 따른 이용건수 차이(box)")
+        st.code('''
+                sns.boxplot(x='요일(num)', y='이용건수',data = data)
+                dofw = list('월화수목금토일')
+                plt.xticks([0,1,2,3,4,5,6],dofw)
+                
+                plt.show()
+                ''',line_numbers=True)
+        fig, ax = plt.subplots()
+        sns.boxplot(x='요일(num)', y='이용건수',data = data, ax=ax)
+        dofw = list('월화수목금토일')
+        plt.xticks([0,1,2,3,4,5,6],dofw, fontproperties=prop)
+        ax.set_xlabel("요일(num)", fontproperties=prop)
+        ax.set_ylabel("이용건수", fontproperties=prop)
+        
+        st.pyplot(fig)
+        plt.close(fig)
+        st.write("공휴일은 상대적으로 변동성이 적고, 평일은 변동성이 큰 편입니다.")
+        
+        st.divider()
+        
+        st.header(f"{idx.getHeadIdx()}결론 도출")
+        st.subheader(f"{idx.getSubIdx()}시간대 및 공휴일여부에 따른 특성")
+        st.write('''
+                - 공공자전거 이용이 가장 많은 시간대는 **평일 오후 6시**입니다.
+                - 두 번째로 이용이 많은 시간대는 **평일 오전 8시**입니다.
+                - 공휴일에는 **오후 2시에서 5시 사이**에 이용이 가장 많습니다.
+                - **평일 이용건수**가 공휴일 이용건수보다 **더 많습니다**.
+                - 평일에는 **출퇴근 시간**에 뚜렷한 이용 피크가 나타납니다.
+                - 공휴일에는 **오전부터 오후까지 완만한 이용 패턴**을 보입니다.
+                ''')
+        st.subheader(f"{idx.getSubIdx()}날씨와 이용건수의 상관관계")
+        st.write('''
+                - 기온이 적정할 때 이용건수가 **증가**하는 경향을 보입니다.
+                - 강수량이 증가할수록 이용건수가 **감소**하는 추세를 보입니다.
+                - 습도, 풍속, 일조량도 이용건수에 **영향**을 미치는 것으로 보입니다.
+                ''')
+        st.divider()
         
     else :
         st.error("Content Not Found !")
 
-    st.button("돌아가기", on_click=update_session_state, args=('go_back',))
+def goback_btn() :
+    button_container = st.container()
+    with button_container:
+         st.button("돌아가기", on_click=update_session_state, args=('go_back',), type="primary")
+    button_container.float(float_css_helper(width="2.2rem", right="5rem",bottom="1rem"))
 
 def main() :
+    float_init()
     page, topic, chapter = init_session_state()
     
     if page == 'page_topic':
         show_topic(topic)
     elif page == 'page_chapter':
+        goback_btn()
         show_chapter(topic, chapter)
+        
     
     with st.sidebar:
         option_menu(
