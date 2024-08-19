@@ -1,19 +1,26 @@
-import streamlit as st
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 import uuid
 
-user_id = st.query_params.get("user_id", None)
+app = FastAPI()
 
-if user_id is None:
+class User(BaseModel):
+    id: str
 
-    user_id = str(uuid.uuid4())
-    st.query_params["user_id"] = user_id
+users = set()
 
-if 'unique_users' not in st.session_state:
-    st.session_state.unique_users = set()
+@app.post("/user")
+async def add_user(user: User):
+    users.add(user.id)
+    return {"count": len(users)}
 
-if user_id not in st.session_state.unique_users:
-    st.session_state.unique_users.add(user_id)
+@app.get("/count")
+async def get_count():
+    return {"count": len(users)}
 
-st.write(f"고유 방문자 수: {len(st.session_state.unique_users)}")
+@app.get("/generate_id")
+async def generate_id():
+    return {"id": str(uuid.uuid4())}
 
-st.write(f"현재 사용자 ID: {user_id}")
+    import streamlit as st
+import requests
