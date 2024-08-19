@@ -11,6 +11,28 @@ import numpy as np
 import seaborn as sns
 from streamlit_float import *
 
+import requests
+
+BACKEND_URL = "http://localhost:8000"  # FastAPI 서버 주소
+
+# 사용자 ID 가져오기 또는 생성
+if "user_id" not in st.session_state:
+    response = requests.get(f"{BACKEND_URL}/generate_id")
+    st.session_state.user_id = response.json()["id"]
+
+# 사용자 등록 및 카운트 업데이트
+response = requests.post(f"{BACKEND_URL}/user", json={"id": st.session_state.user_id})
+user_count = response.json()["count"]
+
+st.write(f"현재 사용자 수: {user_count}")
+st.write(f"당신의 사용자 ID: {st.session_state.user_id}")
+
+# 실시간 카운트 업데이트 버튼
+if st.button("카운트 새로고침"):
+    response = requests.get(f"{BACKEND_URL}/count")
+    user_count = response.json()["count"]
+    st.write(f"업데이트된 사용자 수: {user_count}")
+
 class IndexAllocator:
     def __init__(self):
         self.parentIdx = 0
@@ -5680,7 +5702,7 @@ plt.show()'''
         st.code('# 전체 식당 수\ndf_map.FOOD_FCLTY_CO.sum()', line_numbers=True)
         st.write(df_map.FOOD_FCLTY_CO.sum())
 
-        st.code('# 특정 칼럼의 고유한 값 확인 value_counts()\nCTPRVN_NM.value_counts()', line_numbers=True)  
+        st.code('# 특정 칼럼의 고유한 값 확인 value_counts()\ndf_map.CTPRVN_NM.value_counts()', line_numbers=True)  
         st.write(df_map.CTPRVN_NM.value_counts())
 
         st.code('# SIGNGU_NM의 고유한 값\ndf_map.SIGNGU_NM.value_counts()', line_numbers=True)
@@ -6141,6 +6163,7 @@ plt.show()''', line_numbers=True)
         st.write('- 원 그래프(거주자)')
     
         st.write('이러한 시각화 자료를 통해 설득력을 더욱 높일 수 있습니다.')
+
 
 
 
