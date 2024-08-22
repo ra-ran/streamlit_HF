@@ -5750,6 +5750,10 @@ df_seoul.head()
                 _class = 3
             df_seoul.loc[indx, 'PM10_class'] = _class
         st.write(df_seoul.head())
+        st.write('범위 값(category)으로 나눈 PM10 농도를 막대 그래프로 도출합니다.')
+        st.code('''
+df_seoul['PM10_class'].value_counts().plot(kind="bar")
+plt.show()''', line_numbers=True)
         df_seoul['PM10_class'].value_counts().plot(kind="bar")
         st.pyplot(plt)
         plt.close()
